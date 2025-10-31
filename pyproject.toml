@@ -1,0 +1,60 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "oarepo-checks"
+dynamic = ["version"]
+description = "An extension library for invenio-checks"
+readme = "README.md"
+license = "MIT"
+dependencies = [
+    "oarepo[rdm,tests]>=14,<15",
+    # "oarepo-invenio-typing-stubs>=0.1.0",   # dependency on Descriptor for typed system fields
+    "invenio_checks>=2.0.0,<3.0.0"
+]
+requires-python = ">=3.13,<3.14"
+
+[project.urls]
+Homepage = "https://github.com/oarepo/oarepo-checks"
+
+[project.optional-dependencies]
+dev = [
+    "pytest-invenio",
+]
+tests = [
+    "pytest-invenio",
+    "pytest-oarepo",
+]
+oarepo14=[
+    "oarepo[rdm]>=14,<15",
+]
+
+#[project.entry-points."invenio_base.api_apps"]
+#oarepo_checks = "oarepo_checks.ext:OARepoChecks"
+
+#[project.entry-points."invenio_base.apps"]
+#oarepo_checks = "oarepo_checks.ext:OARepoChecks"
+
+# Later support for Global checks
+# [project.entry-points."invenio_db.models"]
+# TODO
+
+[project.entry-points."invenio_checks.check_types"]
+llm_check = "oarepo_checks.checks.llm_check:LLMCheck"
+
+[tool.hatch.version]
+path = "oarepo_checks/__init__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/oarepo_checks",
+]
+
+[tool.pytest.ini_options]
+    testpaths = [
+        "tests"
+    ]
+
+[tool.hatch.metadata]
+allow-direct-references = true

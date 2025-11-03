@@ -50,6 +50,8 @@ class LLMCheck(Check):
         serialized_full_record = json.dumps(dict(record))
         prompt = prompt.replace("{{record_serialized}}", serialized_full_record)
 
+        # TODO: check for prompt length (depending on the LLM used) so we are not out of context window
+
         # Use the LLM client to get the response
         if current_oarepo_checks.llm_client is None:
             raise RuntimeError("No LLM client configured for oarepo-checks")

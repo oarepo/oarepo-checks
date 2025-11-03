@@ -25,6 +25,7 @@ dev = [
 tests = [
     "pytest-invenio",
     "pytest-oarepo",
+    "deepmerge==2.0"
 ]
 oarepo14=[
     "oarepo[rdm]>=14,<15",

@@ -1,4 +1,16 @@
-import sys
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-checks (see https://github.com/oarepo/oarepo-checks).
+#
+# oarepo-checks is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
+"""Pytest configuration and fixtures for oarepo-checks tests."""
+
+from __future__ import annotations
+
+from typing import Any
 
 import pytest
 from invenio_access.permissions import (
@@ -27,32 +39,26 @@ from oarepo_checks.services.components.checks import ChecksOnCreateComponent
 from .dummy_llm_client import DummyClient
 
 
-# Provide a simple mock for invenio_url_for used in many modules during tests.
 @pytest.fixture(autouse=True)
-def _mock_invenio_url_for(monkeypatch):
+def _mock_invenio_url_for(monkeypatch) -> None:
     """Replace `invenio_url_for` with a no-op mock that returns a simple string.
 
-    This patches the common helper module and also every already-loaded module
-    that exposes the name `invenio_url_for` so that imports like
-    `from invenio_base import invenio_url_for` (which copy the name) are
-    overridden for tests.
+    invenio_url_for is not neccessary here and it was the easiest fix to avoid errors
     """
 
-    def _fake_invenio_url_for(endpoint, **values):
+    def _fake_invenio_url_for(endpoint, **values: Any) -> str:
         # return something deterministic and safe for tests
         try:
             return f"/mock-url/{endpoint}"
-        except Exception:
+        except Exception:  # noqa: BLE001
             return "/mock-url/"
 
     # Patch the helper module if present
     try:
         import invenio_base.urls.helpers as _helpers
 
-        monkeypatch.setattr(
-            _helpers, "invenio_url_for", _fake_invenio_url_for, raising=False
-        )
-    except Exception:
+        monkeypatch.setattr(_helpers, "invenio_url_for", _fake_invenio_url_for, raising=False)
+    except Exception:  # noqa: BLE001, S110
         # ignore if module isn't loaded yet
         pass
 
@@ -60,24 +66,9 @@ def _mock_invenio_url_for(monkeypatch):
     try:
         import invenio_base as _ib
 
-        monkeypatch.setattr(
-            _ib, "invenio_url_for", _fake_invenio_url_for, raising=False
-        )
-    except Exception:
+        monkeypatch.setattr(_ib, "invenio_url_for", _fake_invenio_url_for, raising=False)
+    except Exception:  # noqa: BLE001, S110
         pass
-
-    # Also overwrite the name in any already-imported module that defines it
-    for _mod in list(sys.modules.values()):
-        if not _mod:
-            continue
-        if hasattr(_mod, "invenio_url_for"):
-            try:
-                monkeypatch.setattr(
-                    _mod, "invenio_url_for", _fake_invenio_url_for, raising=False
-                )
-            except Exception:
-                # best-effort patching only
-                pass
 
 
 pytest_plugins = [
@@ -115,16 +106,10 @@ def app_config(app_config):
 
     app_config["THEME_SITENAME"] = "Invenio"
 
-    app_config["RECORDS_REFRESOLVER_CLS"] = (
-        "invenio_records.resolver.InvenioRefResolver"
-    )
-    app_config["RECORDS_REFRESOLVER_STORE"] = (
-        "invenio_jsonschemas.proxies.current_refresolver_store"
-    )
+    app_config["RECORDS_REFRESOLVER_CLS"] = "invenio_records.resolver.InvenioRefResolver"
+    app_config["RECORDS_REFRESOLVER_STORE"] = "invenio_jsonschemas.proxies.current_refresolver_store"
 
-    records_index = LocalProxy(
-        lambda: current_rdm_records_service.record_cls.index._name
-    )
+    records_index = LocalProxy(lambda: current_rdm_records_service.record_cls.index._name)  # noqa: SLF001
     app_config["OAISERVER_RECORD_INDEX"] = records_index
     app_config["INDEXER_DEFAULT_INDEX"] = records_index
 
@@ -170,17 +155,9 @@ def app_config(app_config):
     app_config["COMMUNITIES_OAI_SETS_PREFIX"] = "community-"
 
     app_config["CHECKS_ENABLED"] = True
-    # app_config["OAREPO_CHECKS_LLM_CLIENTS"] = {
-    #    "chat_einfra": ChatEInfraClient(
-    #        api_token=CHAT_EINFRA_TOKEN,
-    #    )
-    # }
-    # app_config["OAREPO_CHECKS_DEFAULT_LLM_CLIENT"] = "chat_einfra"
     app_config["OAREPO_CHECKS_LLM_CLIENTS"] = {"dummy": DummyClient()}
     app_config["OAREPO_CHECKS_DEFAULT_LLM_CLIENT"] = "dummy"
-    app_config["RDM_RECORDS_SERVICE_COMPONENTS"] = DefaultRecordsComponents + [
-        ChecksOnCreateComponent
-    ]
+    app_config["RDM_RECORDS_SERVICE_COMPONENTS"] = [*DefaultRecordsComponents, ChecksOnCreateComponent]
 
     return app_config
 
@@ -188,23 +165,22 @@ def app_config(app_config):
 @pytest.fixture(scope="module")
 def extra_entry_points():
     """Extra entrypoints."""
-
     return {
         "invenio_base.blueprints": [
-            "invenio_app_rdm_records = tests.mock_module:create_invenio_app_rdm_records_blueprint",  # noqa
-            "invenio_app_rdm_requests = tests.mock_module:create_invenio_app_rdm_requests_blueprint",  # noqa
-            "invenio_app_rdm_communities = tests.mock_module:create_invenio_app_rdm_communities_blueprint",  # noqa
+            "invenio_app_rdm_records = tests.mock_module:create_invenio_app_rdm_records_blueprint",
+            "invenio_app_rdm_requests = tests.mock_module:create_invenio_app_rdm_requests_blueprint",
+            "invenio_app_rdm_communities = tests.mock_module:create_invenio_app_rdm_communities_blueprint",
         ],
         "invenio_base.apps": [
-            "invenio_rdm_records = invenio_rdm_records:InvenioRDMRecords",  # noqa
+            "invenio_rdm_records = invenio_rdm_records:InvenioRDMRecords",
         ],
         "invenio_base.api_apps": [
-            "invenio_rdm_records = invenio_rdm_records:InvenioRDMRecords",  # noqa
+            "invenio_rdm_records = invenio_rdm_records:InvenioRDMRecords",
         ],
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def minimal_record():
     """Minimal record data as dict coming from the external world."""
     return {
@@ -241,22 +217,22 @@ def minimal_record():
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def index_users():
     """Index users for an up-to-date user service."""
 
-    def _index():
+    def _index() -> None:
         current_users_service.indexer.process_bulk_queue()
         current_users_service.record_cls.index.refresh()
 
     return _index
 
 
-@pytest.fixture()
+@pytest.fixture
 def inviter(index_users):
     """Add/invite a user to a community with a specific role."""
 
-    def invite(user_id, community_id, role):
+    def invite(user_id: str, community_id: str, role: str) -> None:
         """Add/invite a user to a community with a specific role."""
         assert role in ["curator", "owner"]
         invitation_data = {
@@ -269,9 +245,7 @@ def inviter(index_users):
             "role": role,
             "visible": True,
         }
-        current_communities.service.members.add(
-            system_identity, community_id, invitation_data
-        )
+        current_communities.service.members.add(system_identity, community_id, invitation_data)
         index_users()
 
     return invite
@@ -449,8 +423,6 @@ def community(users):
             "organizations": [{"name": "Test Org"}],
         },
     }
-    community = current_communities.service.create(
-        community_owner.identity, community_dict
-    )
+    community = current_communities.service.create(community_owner.identity, community_dict)
     Community.index.refresh()
     return community

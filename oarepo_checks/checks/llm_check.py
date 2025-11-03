@@ -1,13 +1,26 @@
+#
+# Copyright (c) 2025 CESNET z.s.p.o.
+#
+# This file is a part of oarepo-checks (see https://github.com/oarepo/oarepo-checks).
+#
+# oarepo-checks is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 """LLM check implementation."""
 
+from __future__ import annotations
+
 import json
-from typing import Dict, List
+from typing import TYPE_CHECKING
 
 from invenio_checks.base import Check
 from invenio_checks.contrib.metadata.check import CheckResult
-from invenio_checks.models import CheckConfig
 
 from oarepo_checks.proxies import current_oarepo_checks
+
+if TYPE_CHECKING:
+    from invenio_checks.models import CheckConfig
+    from invenio_records.api import Record
 
 
 class LLMCheck(Check):
@@ -17,10 +30,10 @@ class LLMCheck(Check):
     title = "LLM validation"
     description = "Validates record using LLM."
 
-    def validate_config(self, config):
+    def validate_config(self, config: CheckConfig) -> bool:
         """Validate the configuration for this metadata check."""
         if not isinstance(config, dict):
-            raise ValueError("Configuration must be a dictionary")
+            raise TypeError("Configuration must be a dictionary")
 
         prompt = config.get("prompt")
         if not prompt or not isinstance(prompt, str):
@@ -28,7 +41,7 @@ class LLMCheck(Check):
 
         return True
 
-    def run(self, record, config: CheckConfig):
+    def run(self, record: Record, config: CheckConfig) -> CheckResult:
         """Run the metadata check on a record with the given configuration."""
         # Create a check result
         result = CheckResult(self.id)
@@ -38,6 +51,9 @@ class LLMCheck(Check):
         prompt = prompt.replace("{{record_serialized}}", serialized_full_record)
 
         # Use the LLM client to get the response
+        if current_oarepo_checks.llm_client is None:
+            raise RuntimeError("No LLM client configured for oarepo-checks")
+
         json_with_errors = current_oarepo_checks.llm_client.chat_completion(prompt)
 
         errors = self.parse_errors(json_with_errors)
@@ -45,7 +61,7 @@ class LLMCheck(Check):
 
         return result
 
-    def parse_errors(self, llm_output: str) -> List[Dict]:
+    def parse_errors(self, llm_output: str) -> list[dict]:
         """Create error messages for the UI."""
         json_output = json.loads(llm_output)
 

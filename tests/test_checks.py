@@ -19,7 +19,7 @@ from invenio_records_resources.services.uow import (
 )
 
 
-@patch("oarepo_checks.services.components.checks_components.ChecksComponent.create")
+@patch("oarepo_checks.services.components.checks.ChecksOnCreateComponent.create")
 def test_run_checks_on_create(
     mock_create,
     app,

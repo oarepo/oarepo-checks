@@ -10,6 +10,8 @@
 
 from __future__ import annotations
 
+import contextlib
+import sys
 from typing import Any
 
 import pytest
@@ -54,21 +56,26 @@ def _mock_invenio_url_for(monkeypatch) -> None:
             return "/mock-url/"
 
     # Patch the helper module if present
-    try:
+    with contextlib.suppress(Exception):
         import invenio_base.urls.helpers as _helpers
 
         monkeypatch.setattr(_helpers, "invenio_url_for", _fake_invenio_url_for, raising=False)
-    except Exception:  # noqa: BLE001, S110
-        # ignore if module isn't loaded yet
-        pass
 
     # Patch the package-level symbol if present
-    try:
+    with contextlib.suppress(Exception):
         import invenio_base as _ib
 
         monkeypatch.setattr(_ib, "invenio_url_for", _fake_invenio_url_for, raising=False)
-    except Exception:  # noqa: BLE001, S110
-        pass
+
+    # Also overwrite the name in any already-imported module that defines it
+    for _mod in list(sys.modules.values()):
+        if not _mod:
+            continue
+
+        if hasattr(_mod, "invenio_url_for"):
+            with contextlib.suppress(Exception):
+                # best-effort patching only
+                monkeypatch.setattr(_mod, "invenio_url_for", _fake_invenio_url_for, raising=False)
 
 
 pytest_plugins = [

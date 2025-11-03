@@ -82,6 +82,23 @@ db.session.commit()
 
 The prompt should instruct the LLM to return structured JSON with errors organized by sections (e.g., `metadata`, `authors`, `files`, `license`).
 
+### 4. Enable Checks on Record Creation (Optional)
+
+By default, invenio-checks runs on record updates or by using a review section under parent information. If you want to also run checks when records are first created, add the `ChecksOnCreateComponent` to your service components:
+
+```python
+from invenio_rdm_records.services.components import DefaultRecordsComponents
+from oarepo_checks.services.components.checks import ChecksOnCreateComponent
+
+# In your invenio.cfg or app configuration
+app_config["RDM_RECORDS_SERVICE_COMPONENTS"] = [
+    *DefaultRecordsComponents,
+    ChecksOnCreateComponent
+]
+```
+
+This component will trigger validation checks immediately when a new record/draft is created.
+
 ## Usage
 
 Once configured, the LLM check integrates with invenio-checks. It will:

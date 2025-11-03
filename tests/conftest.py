@@ -13,12 +13,18 @@ from invenio_rdm_records.proxies import current_rdm_records_service
 from invenio_rdm_records.services.communities.components import (
     CommunityServiceComponents,
 )
+from invenio_rdm_records.services.components import DefaultRecordsComponents
 from invenio_rdm_records.services.permissions import RDMRequestsPermissionPolicy
 from invenio_records_resources.references.entity_resolvers import ServiceResultResolver
 from invenio_users_resources.proxies import current_users_service
 from invenio_vocabularies.proxies import current_service as vocabulary_service
 from invenio_vocabularies.records.api import Vocabulary
 from werkzeug.local import LocalProxy
+
+from oarepo_checks.config import DEFAULT_PROMPT
+from oarepo_checks.services.components.checks import ChecksOnCreateComponent
+
+from .dummy_llm_client import DummyClient
 
 
 # Provide a simple mock for invenio_url_for used in many modules during tests.
@@ -164,6 +170,18 @@ def app_config(app_config):
     app_config["COMMUNITIES_OAI_SETS_PREFIX"] = "community-"
 
     app_config["CHECKS_ENABLED"] = True
+    # app_config["OAREPO_CHECKS_LLM_CLIENTS"] = {
+    #    "chat_einfra": ChatEInfraClient(
+    #        api_token=CHAT_EINFRA_TOKEN,
+    #    )
+    # }
+    # app_config["OAREPO_CHECKS_DEFAULT_LLM_CLIENT"] = "chat_einfra"
+    app_config["OAREPO_CHECKS_LLM_CLIENTS"] = {"dummy": DummyClient()}
+    app_config["OAREPO_CHECKS_DEFAULT_LLM_CLIENT"] = "dummy"
+    app_config["RDM_RECORDS_SERVICE_COMPONENTS"] = DefaultRecordsComponents + [
+        ChecksOnCreateComponent
+    ]
+
     return app_config
 
 
@@ -393,7 +411,7 @@ def create_llm_check(db, community):
         check_id="llm",  # The ID of the LLMCheck
         severity=Severity.WARN,
         enabled=True,
-        params={"prompts": ["blah blah blah"]},
+        params={"prompt": DEFAULT_PROMPT},
     )
     db.session.add(check_config_llm)
     db.session.commit()

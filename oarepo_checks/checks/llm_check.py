@@ -3,12 +3,11 @@
 import json
 from typing import Dict, List
 
-import requests
 from invenio_checks.base import Check
 from invenio_checks.contrib.metadata.check import CheckResult
 from invenio_checks.models import CheckConfig
 
-from oarepo_checks.config import CHAT_EINFRA_TOKEN, DEFAULT_PROMPT
+from oarepo_checks.proxies import current_oarepo_checks
 
 
 class LLMCheck(Check):
@@ -17,63 +16,50 @@ class LLMCheck(Check):
     id = "llm"
     title = "LLM validation"
     description = "Validates record using LLM."
-    sort_order = 10
 
     def validate_config(self, config):
         """Validate the configuration for this metadata check."""
         if not isinstance(config, dict):
             raise ValueError("Configuration must be a dictionary")
 
-        prompts = config.get("prompts")
-        if not prompts or not isinstance(prompts, list):
-            raise ValueError("Configuration must contain a 'prompts' list")
+        prompt = config.get("prompt")
+        if not prompt or not isinstance(prompt, str):
+            raise ValueError("Configuration must contain a 'prompt' string")
 
-        for prompt in prompts:
-            if not isinstance(prompt, str):
-                raise ValueError("Each prompt must be a string")
         return True
 
     def run(self, record, config: CheckConfig):
         """Run the metadata check on a record with the given configuration."""
         # Create a check result
         result = CheckResult(self.id)
-        # TODO: get prompt from config
-        # prompt = config.params.get("prompts")[0]
+        prompt = config.params.get("prompt")
 
         serialized_full_record = json.dumps(dict(record))
-        prompt = DEFAULT_PROMPT.replace("{{record_serialized}}", serialized_full_record)
+        prompt = prompt.replace("{{record_serialized}}", serialized_full_record)
 
-        # Stupid way for now, later we can make it configurable
-        url = "https://chat.ai.e-infra.cz/api/chat/completions"
-        token = CHAT_EINFRA_TOKEN
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
-        }
-        data = {
-            "model": "deepseek-r1",
-            "messages": [{"role": "user", "content": prompt}],
-        }
-        response = requests.post(url, headers=headers, json=data)
-        response_json = response.json()
-        llm_output = response_json["choices"][0]["message"]["content"]
+        # Use the LLM client to get the response
+        json_with_errors = current_oarepo_checks.llm_client.chat_completion(prompt)
 
-        result = self.to_service_errors(llm_output)
+        errors = self.parse_errors(json_with_errors)
+        result.errors.extend(errors)
 
         return result
 
-    def to_service_errors(self, llm_output: str) -> List[Dict]:
+    def parse_errors(self, llm_output: str) -> List[Dict]:
         """Create error messages for the UI."""
         json_output = json.loads(llm_output)
 
         output = []
 
-        for path, messages in json_output.items():
+        for path, info in json_output.items():
+            if info.get("section_empty"):
+                continue
+
             output.append(
                 {
                     "field": path,
-                    "messages": [messages],
-                    "description": "LLM generated errors",
+                    "messages": info["errors"],
+                    "description": "LLM generated errors. Proceed with caution.",
                     "severity": "warning",
                 }
             )

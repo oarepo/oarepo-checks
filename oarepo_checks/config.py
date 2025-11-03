@@ -14,6 +14,16 @@ import os
 
 from dotenv import load_dotenv
 
+WHOLE_REPOSITORY_BASED_RULES = """
+Obecná pravidla pro repozitář nejsou zatím definována.
+I přesto prověř všechny části záznamu a hledej chyby nebo nesrovnalosti podle běžných standardů.
+"""
+
+COMMUNITY_BASED_RULES = """
+Pravidla pro tuto konkrétní komunitu nejsou zatím definována.
+I přesto prověř záznam a vyhodnoť všechny sekce podle obecných zásad a kontextu komunity.
+"""
+
 DEFAULT_PROMPT = """
 Jsi asistent, který funguje jako recenzent záznamů v datovém repozitáři.
 Dostaneš celý záznam v serializované podobě (metadata, informace o souborech, související zdroje atd.)
@@ -30,19 +40,17 @@ a tvým úkolem je:
 5. Výstup musí být **striktně ve formátu JSON**, strukturovaný podle sekcí a podsekcí.
 6. Při vyhodnocování zohledňuj **kontext typu záznamu** (např. dataset, článek, software, metodologie).
 7. Pokud nejsou žádné chyby, vrát JSON objekt s "section_empty": true a prázdným seznamem errors pro každou sekci.
-8. Použij následující sekce a podsekce:
-   - metadata (včetně metadata.title, metadata.abstract, metadata.keywords, metadata.funding)
-   - authors (authors.orcid)
-   - files
-   - technical_info
-   - related_resources
-   - license
 
 ---
 
-# FUTURE: Specifická pravidla pro komunitu X budou přidána sem
-# FUTURE: Pravidla pro repozitář v celém repozitáři budou přidána sem
+Níže jsou uvedena pravidla, která mají sloužit jako podklad pro hodnocení kvality záznamu:
 
+Obecná pravidla pro repozitář nejsou zatím definována. I přesto prověř všechny části záznamu a hledej chyby nebo nesrovnalosti podle běžných standardů níže.
+Tato pravidla popisují obecné požadavky a kontroly platné pro všechny záznamy v rámci celého repozitáře, bez ohledu na jejich konkrétní tematické zaměření.
+
+Pravidla pro tuto konkrétní komunitu nejsou zatím definována. I přesto prověř všechny části záznamu a hledej chyby nebo nesrovnalosti podle běžných standardů níže.
+Tato pravidla platí pouze pro konkrétní komunitu, kde má být záznam publikován nebo vytvořen. Komunita může definovat svá vlastní doplňující požadavky, které reflektují její oborová nebo metodologická specifika.
+---
 
 ### Příklady typických pravidel a podmínek:
 
@@ -119,7 +127,7 @@ a tvým úkolem je:
             "error_long": "U technických informací chybí popis jednotlivých souborů. Doporučujeme doplnit formát, počet záznamů a strukturu dat."
         }
     ],
-    "related_resources": [
+    "metadata.related_resources": [
         {
             "error_short": "Chybějící DOI souvisejícího článku",
             "error_long": "Záznam odkazuje na článek, ale DOI není vyplněno. Pokud je článek vydán, doplňte jeho DOI."

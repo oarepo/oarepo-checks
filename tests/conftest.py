@@ -36,7 +36,6 @@ from invenio_vocabularies.proxies import current_service as vocabulary_service
 from invenio_vocabularies.records.api import Vocabulary
 from werkzeug.local import LocalProxy
 
-from oarepo_checks.config import DEFAULT_PROMPT
 from oarepo_checks.services.components.checks import OARepoCheckComponent
 from oarepo_checks.services.components.register_check_config import RegisterCheckComponent
 
@@ -426,7 +425,7 @@ def create_llm_check(db, community):
         check_id="llm",  # The ID of the LLMCheck
         severity=Severity.WARN,
         enabled=True,
-        params={"prompt": DEFAULT_PROMPT},
+        params={"prompt": "Default prompt"},
     )
     db.session.add(check_config_llm)
     db.session.commit()

@@ -44,20 +44,29 @@ def test_enable_llm_check_success(app, db, users, location):
     community = current_communities.service.create(community_owner.identity, community_dict)
     Community.index.refresh()
 
+    # Disable the auto-created LLM check
+    check_config = CheckConfig.query.filter_by(
+        community_id=community.id,
+        check_id="llm",
+    ).first()
+    check_config.enabled = False
+    db.session.add(check_config)
+    db.session.commit()
+
     community_configs = CheckConfig.query.filter_by(community_id=community.id, check_id="llm").all()
     assert len(community_configs) == 1
-    assert community_configs[0].enabled is True
+    assert community_configs[0].enabled is False
 
     # Run the CLI command
     runner = CliRunner()
-    result = runner.invoke(checks, ["disable-llm-check", "test-community"])
+    result = runner.invoke(checks, ["enable-llm-check", "test-community"])
 
     # Check command output
     assert result.exit_code == 0
-    assert "Disabled LLM check for community 'test-community'" in result.output
+    assert "Enabled LLM check for community 'test-community'" in result.output
     assert "1 config(s) updated" in result.output
 
-    # Verify the config is now disabled
+    # Verify the config is now enabled
     db.session.expire_all()
     updated_config = CheckConfig.query.filter_by(
         community_id=community.id,
@@ -91,26 +100,17 @@ def test_disable_llm_check_success(app, db, users, location):
     community = current_communities.service.create(community_owner.identity, community_dict)
     Community.index.refresh()
 
-    # Disable the auto-created LLM check
-    check_config = CheckConfig.query.filter_by(
-        community_id=community.id,
-        check_id="llm",
-    ).first()
-    check_config.enabled = False
-    db.session.add(check_config)
-    db.session.commit()
-
     community_configs = CheckConfig.query.filter_by(community_id=community.id, check_id="llm").all()
     assert len(community_configs) == 1
-    assert community_configs[0].enabled is False
+    assert community_configs[0].enabled is True
 
     # Run the CLI command
     runner = CliRunner()
-    result = runner.invoke(checks, ["enable-llm-check", "test-community"])
+    result = runner.invoke(checks, ["disable-llm-check", "test-community"])
 
     # Check command output
     assert result.exit_code == 0
-    assert "Enabled LLM check for community 'test-community'" in result.output
+    assert "Disabled LLM check for community 'test-community'" in result.output
     assert "1 config(s) updated" in result.output
 
     # Verify the config is now enabled

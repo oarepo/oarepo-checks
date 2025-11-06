@@ -37,12 +37,14 @@ oarepo_checks = "oarepo_checks.ext:OARepoChecks"
 [project.entry-points."invenio_base.apps"]
 oarepo_checks = "oarepo_checks.ext:OARepoChecks"
 
-# Later support for Global checks
-# [project.entry-points."invenio_db.models"]
-# TODO
-
 [project.entry-points."invenio_checks.check_types"]
 llm_check = "oarepo_checks.checks.llm_check:LLMCheck"
+
+[project.entry-points."invenio_base.blueprints"]
+oarepo_checks = "oarepo_checks.views:create_blueprint"
+
+[project.entry-points."flask.commands"]
+oarepo = "oarepo_checks.cli:checks"
 
 [tool.hatch.version]
 path = "oarepo_checks/__init__.py"
@@ -50,6 +52,16 @@ path = "oarepo_checks/__init__.py"
 [tool.hatch.build.targets.sdist]
 include = [
     "/oarepo_checks",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["oarepo_checks"]
+
+[tool.hatch.build]
+include = [
+    "oarepo_checks/**/*.py",
+    "oarepo_checks/templates/**/*.jinja",
+    "oarepo_checks/templates/**/*.jinja2",
 ]
 
 [tool.pytest.ini_options]

@@ -35,6 +35,7 @@ class LLMCheck(Check):
         if not isinstance(config, dict):
             raise TypeError("Configuration must be a dictionary")
 
+        # Check for prompt string
         prompt = config.get("prompt")
         if not prompt or not isinstance(prompt, str):
             raise ValueError("Configuration must contain a 'prompt' string")
@@ -45,9 +46,12 @@ class LLMCheck(Check):
         """Run the metadata check on a record with the given configuration."""
         # Create a check result
         result = CheckResult(self.id)
-        prompt = config.params.get("prompt")
 
+        # Serialize the record
         serialized_full_record = json.dumps(dict(record))
+
+        # Get the pre-rendered prompt from config and replace the record placeholder
+        prompt = config.params.get("prompt", "")
         prompt = prompt.replace("{{record_serialized}}", serialized_full_record)
 
         # TODO: check for prompt length (depending on the LLM used) so we are not out of context window

@@ -1,0 +1,45 @@
+Tato pravidla popisují obecné požadavky a kontroly platné pro všechny záznamy v rámci celého repozitáře, bez ohledu na jejich konkrétní tematické zaměření.
+
+### Příklady typických pravidel a podmínek:
+
+**Obecné kontroly**
+- Pokud jakékoliv pole obsahuje překlepy nebo nesprávnou diakritiku, upozorni na opravu.
+- Pokud jsou duplicitní záznamy nebo prázdná pole, upozorni.
+- Pokud jazyková pole neodpovídají skutečnému jazyku obsahu (čeština / angličtina), nahlas chybu.
+
+**Název (`metadata.title`)**
+- Pokud je záznam typu *dataset* a název to nijak nereflektuje, nahlas chybu a navrhni opravu.
+- Pokud jde o *článek*, nenavrhuj přidání „dataset" do názvu.
+- Pokud název obsahuje zkratky jako "NEW" nebo verzi bez významu, navrhni jejich odstranění nebo konkretizaci.
+- Pokud název odkazuje na projekt, zkontroluj správnost kódu a formát podle IS VaVaI.
+
+**Abstrakt (`metadata.abstract`)**
+- Pokud chybí abstrakt v jazyce odpovídajícím kódu jazyka (cs / en), upozorni na nesoulad
+- Pokud abstrakt obsahuje duplicitní informace, doporuč rozdělení do metodologie a technických informací.
+
+**Klíčová slova (`metadata.keywords`)**
+- Pokud chybí klíčová slova, navrhni doplnění.
+- Pokud kód jazyka neodpovídá jazyku klíčových slov (např. kód „cs", ale slova v angličtině), nahlas chybu.
+- Pokud jsou klíčová slova vložena jako jeden řetězec, doporuč rozdělení do samostatných polí.
+
+**Autoři (`authors.orcid`)**
+- Pokud chybí ORCID u jednoho nebo více autorů, nahlas to.
+- Pokud se autor opakuje nebo jméno chybí, upozorni na chybu.
+- Pokud jména autorů nejsou uvedena s diakritikou nebo ve formátu „příjmení, jméno", doporuč úpravu.
+
+**Projekty a financování (`metadata.funding`)**
+- Pokud existuje projekt, ale kód není v souladu s formátem IS VaVaI (např. chybí prefix GX, GA, LM), nahlas chybu.
+- Pokud chybí informace o financování u grantových projektů, navrhni doplnění.
+
+**Technické informace (`technical_info`)**
+- Pokud chybí popis souborů, použité metody, formáty nebo podmínky užití, doporuč doplnění.
+
+**Související zdroje (`related_resources`)**
+- Pokud dataset souvisí s publikovaným článkem, ale chybí DOI nebo odkaz, doporuč doplnění.
+- Pokud jde o novou verzi záznamu, doporuč přidat odkaz nebo poznámku o předchozí verzi.
+- Pokud článek existuje, ale není propojen přes DOI, upozorni.
+
+**Licencování (`metadata.license`)**
+- Pokud chybí licence u datasetu, navrhni doplnění.
+- Pokud je licence zastaralá (např. CC verze 1), doporuč aktualizaci na nejnovější verzi (např. CC-BY 4.0).
+- Pokud se mění licence při nové verzi datasetu, navrhni ověření souhlasu autorů.

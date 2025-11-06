@@ -1,0 +1,14 @@
+{% if community %}
+**Informace o komunitě:**
+- Název: {{ community.metadata.title }}
+{% if community.metadata.curation_policy %}
+- Kurátorská politika: {{ community.metadata.curation_policy }}
+{% endif %}
+{% if community.metadata.description %}
+- Popis: {{ community.metadata.description }}
+{% endif %}
+{% else %}
+Pravidla pro tuto konkrétní komunitu nejsou zatím definována. I přesto prověř všechny části záznamu a hledej chyby nebo nesrovnalosti podle běžných standardů níže.
+{% endif %}
+
+**Poznámka:** Pokud komunita definuje vlastní pravidla v kurátorské politice, věnuj jim zvláštní pozornost při hodnocení.

@@ -6,24 +6,30 @@
 # oarepo-checks is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
-"""Componenent that runs checks on record creation."""
+"""Component that runs checks on record with no communities."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
+from flask import current_app
+from invenio_access.permissions import system_identity
 from invenio_checks.api import ChecksAPI
-from invenio_checks.components import toggle_on_feature_flag
-from invenio_drafts_resources.services.records.components import ServiceComponent
+from invenio_checks.components import ChecksComponent
+from invenio_communities import current_communities
 
 if TYPE_CHECKING:
     from flask_principal import Identity
     from invenio_records import Record
 
 
-@toggle_on_feature_flag
-class ChecksOnCreateComponent(ServiceComponent):
-    """Checks component to run checks also on creation of a record."""
+class OARepoCheckComponent(ChecksComponent):
+    """Component that extends invenio-checks component.
+
+    This components extends ChecksComponent by running checks on creation of records
+    and overrides method for community retrieval to return a generic community in order
+    to run checks even when no community is assigned to the record.
+    """
 
     def create(
         self,
@@ -38,10 +44,6 @@ class ChecksOnCreateComponent(ServiceComponent):
         # Take into account already included communities
         community_ids = self._get_record_communities(draft)
 
-        past_runs = ChecksAPI.get_runs(draft)
-        for run in past_runs:
-            community_ids.add(str(run.config.community_id))
-
         updated_runs = []
         configs = ChecksAPI.get_configs(community_ids)
         for config in configs:
@@ -50,17 +52,21 @@ class ChecksOnCreateComponent(ServiceComponent):
                 updated_runs.append(run)
 
     def _get_record_communities(self, record_or_draft: Record | None) -> set[str]:
-        """Get community IDs from the record or draft.
+        """Override method to return generic community when no community is present on record."""
+        communities = cast("set", super()._get_record_communities(record_or_draft))
+        if communities:
+            return communities
 
-        Taken from ChecksComponent (https://github.com/inveniosoftware/invenio-checks/blob/master/invenio_checks/components.py).
-        Since we do not need to inherit from that class here, we duplicate the method.
-        """
-        if record_or_draft is None:
+        generic_community_slug = current_app.config.get("CHECKS_GENERIC_COMMUNITY")
+
+        if generic_community_slug is None:
             return set()
 
-        community_ids = set()
-        for community in record_or_draft.parent.communities:  # type: ignore[attr-defined]
-            community_ids.add(str(community.id))
-            if community.parent:
-                community_ids.add(str(community.parent.id))
-        return community_ids
+        results = list(
+            current_communities.service.search(system_identity, params={"q": f"slug:{generic_community_slug}"}).hits
+        )
+
+        generic_community = results[0] if results else None
+        if not generic_community:
+            return set()  # generic community not found
+        return {generic_community["id"]}

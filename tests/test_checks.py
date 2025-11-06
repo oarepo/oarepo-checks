@@ -8,8 +8,6 @@
 #
 from __future__ import annotations
 
-from unittest.mock import patch
-
 from invenio_checks.models import CheckRun
 from invenio_drafts_resources.services.records.uow import ParentRecordCommitOp
 from invenio_rdm_records.proxies import current_rdm_records_service
@@ -19,9 +17,7 @@ from invenio_records_resources.services.uow import (
 )
 
 
-@patch("oarepo_checks.services.components.checks.ChecksOnCreateComponent.create")
-def test_run_checks_on_create(
-    mock_create,
+def test_run_checks_on_draft_update_no_generic_community(
     app,
     db,
     location,
@@ -30,35 +26,6 @@ def test_run_checks_on_create(
     minimal_record,
     inviter,
     resource_type_v,
-    create_metadata_check,
-    # create_llm_check,
-):
-    """Test that invenio-checks runs validation on community submission."""
-    submitter = users[1]
-
-    # Add the submitter to the community as a member (e.g. curator role), so he can create records in it
-    inviter(submitter.id, community.id, "curator")
-
-    # Create a draft
-    service = current_rdm_records_service
-
-    _ = service.create(submitter.identity, minimal_record)
-
-    # Assert components has been called
-    mock_create.assert_called_once()
-
-
-def test_checks_on_draft_update_no_llm(
-    app,
-    db,
-    location,
-    users,
-    community,
-    minimal_record,
-    inviter,
-    resource_type_v,
-    create_metadata_check,
-    # create_llm_check,
 ):
     """Test that invenio-checks runs validation on community submission."""
     submitter = users[1]
@@ -88,14 +55,16 @@ def test_checks_on_draft_update_no_llm(
     minimal_record["metadata"]["title"] = "Updated Title"
     _ = service.update_draft(submitter.identity, draft.id, minimal_record)
 
-    # Verify Checks in Database after update, should be only 1 since no LLM check
+    # Verify Checks in Database after update
     check_runs_after = CheckRun.query.filter(
         CheckRun.record_id == draft._record.id,  # noqa: SLF001
     ).all()
     assert len(check_runs_after) == 1
+    assert check_runs_after[0].config.check_id == "llm"
+    assert str(check_runs_after[0].config.community_id) == community.id
 
 
-def test_checks_on_draft_update_multiple_checks(
+def test_run_checks_on_draft_update_multiple_checks(
     app,
     db,
     location,
@@ -105,7 +74,6 @@ def test_checks_on_draft_update_multiple_checks(
     inviter,
     resource_type_v,
     create_metadata_check,
-    create_llm_check,
 ):
     """Test that invenio-checks runs validation on community submission."""
     submitter = users[1]

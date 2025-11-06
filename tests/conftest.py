@@ -22,6 +22,7 @@ from invenio_app.factory import create_api
 from invenio_checks.models import CheckConfig, Severity
 from invenio_communities import current_communities
 from invenio_communities.communities.records.api import Community
+from invenio_communities.communities.services.components import DefaultCommunityComponents
 from invenio_rdm_records import config
 from invenio_rdm_records.proxies import current_rdm_records_service
 from invenio_rdm_records.services.communities.components import (
@@ -36,7 +37,8 @@ from invenio_vocabularies.records.api import Vocabulary
 from werkzeug.local import LocalProxy
 
 from oarepo_checks.config import DEFAULT_PROMPT
-from oarepo_checks.services.components.checks import ChecksOnCreateComponent
+from oarepo_checks.services.components.checks import OARepoCheckComponent
+from oarepo_checks.services.components.register_check_config import RegisterCheckComponent
 
 from .dummy_llm_client import DummyClient
 
@@ -164,7 +166,16 @@ def app_config(app_config):
     app_config["CHECKS_ENABLED"] = True
     app_config["OAREPO_CHECKS_LLM_CLIENTS"] = {"dummy": DummyClient()}
     app_config["OAREPO_CHECKS_DEFAULT_LLM_CLIENT"] = "dummy"
-    app_config["RDM_RECORDS_SERVICE_COMPONENTS"] = [*DefaultRecordsComponents, ChecksOnCreateComponent]
+
+    modified_records_components = DefaultRecordsComponents
+    for i, component in enumerate(modified_records_components):
+        if component.__name__ == "ChecksComponent":
+            # Replace with our custom component
+            modified_records_components[i] = OARepoCheckComponent
+
+    app_config["RDM_RECORDS_SERVICE_COMPONENTS"] = modified_records_components
+    app_config["CHECKS_GENERIC_COMMUNITY"] = "generic-community"  # slug of the generic community
+    app_config["COMMUNITIES_SERVICE_COMPONENTS"] = [*DefaultCommunityComponents, RegisterCheckComponent]
 
     return app_config
 
@@ -386,6 +397,29 @@ def create_metadata_check(db, community):
 
 
 @pytest.fixture
+def create_generic_community_metadata_check(db, generic_community):
+    check_config = CheckConfig(
+        community_id=generic_community.id,
+        check_id="metadata",  # The ID of the MetadataCheck
+        severity=Severity.WARN,
+        enabled=True,
+        params={
+            "rules": [
+                {
+                    "id": "title-required",
+                    "title": "Title Required",
+                    "message": "A title is required for all records",
+                    "level": "failure",
+                    "checks": [{"type": "field", "path": "metadata.title"}],
+                }
+            ]
+        },
+    )
+    db.session.add(check_config)
+    db.session.commit()
+
+
+@pytest.fixture
 def create_llm_check(db, community):
     check_config_llm = CheckConfig(
         community_id=community.id,
@@ -428,6 +462,31 @@ def community(users):
             "page": "Info.",
             "website": "https://example.org/",
             "organizations": [{"name": "Test Org"}],
+        },
+    }
+    community = current_communities.service.create(community_owner.identity, community_dict)
+    Community.index.refresh()
+    return community
+
+
+@pytest.fixture
+def generic_community(users):
+    community_owner = users[0]
+
+    community_dict = {
+        "access": {
+            "visibility": "public",
+            "member_policy": "open",
+            "record_policy": "open",
+        },
+        "slug": "generic-community",
+        "metadata": {
+            "title": "Generic Community",
+            "description": "A generic community for testing purposes.",
+            "curation_policy": "Testing.",
+            "page": "Info.",
+            "website": "https://example.org/",
+            "organizations": [{"name": "Generic Test Org"}],
         },
     }
     community = current_communities.service.create(community_owner.identity, community_dict)

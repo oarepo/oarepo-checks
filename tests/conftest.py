@@ -177,7 +177,6 @@ def app_config(app_config):
     app_config["COMMUNITIES_SERVICE_COMPONENTS"] = [*DefaultCommunityComponents, RegisterCheckComponent]
 
     app_config["CELERY_TASK_ALWAYS_EAGER"] = True
-    # app_config["SQLALCHEMY_ECHO"] = True
     app_config["SQLALCHEMY_DATABASE_URI"] = "postgresql+psycopg2://invenio:invenio@localhost:5432/invenio"
     return app_config
 

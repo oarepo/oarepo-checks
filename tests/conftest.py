@@ -176,6 +176,9 @@ def app_config(app_config):
     app_config["CHECKS_GENERIC_COMMUNITY"] = "generic-community"  # slug of the generic community
     app_config["COMMUNITIES_SERVICE_COMPONENTS"] = [*DefaultCommunityComponents, RegisterCheckComponent]
 
+    app_config["CELERY_TASK_ALWAYS_EAGER"] = True
+    # app_config["SQLALCHEMY_ECHO"] = True
+    app_config["SQLALCHEMY_DATABASE_URI"] = "postgresql+psycopg2://invenio:invenio@localhost:5432/invenio"
     return app_config
 
 
@@ -268,8 +271,8 @@ def inviter(index_users):
     return invite
 
 
-@pytest.fixture(scope="module")
-def resource_type_v(app, resource_type_type):
+@pytest.fixture
+def resource_type_v(app, db, resource_type_type):
     """Resource type vocabulary record."""
     vocabulary_service.create(
         system_identity,
@@ -437,14 +440,14 @@ def create_app(instance_path, entry_points):
     return create_api
 
 
-@pytest.fixture(scope="module")
-def resource_type_type(app):
+@pytest.fixture
+def resource_type_type(app, db):
     """Resource type vocabulary type."""
     return vocabulary_service.create_type(system_identity, "resourcetypes", "rsrct")
 
 
 @pytest.fixture
-def community(users):
+def community(db, users):
     community_owner = users[0]
 
     community_dict = {
@@ -469,7 +472,7 @@ def community(users):
 
 
 @pytest.fixture
-def generic_community(users):
+def generic_community(db, users):
     community_owner = users[0]
 
     community_dict = {

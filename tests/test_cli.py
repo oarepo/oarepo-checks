@@ -19,7 +19,7 @@ from sqlalchemy.orm.attributes import flag_modified
 from oarepo_checks.cli import checks
 
 
-def test_enable_llm_check_success(app, db, users, location):
+def test_enable_llm_check_success(app, db, users, location, search_clear):
     """Test enabling LLM check for a specific community."""
     community_owner = users[0]
 
@@ -72,10 +72,10 @@ def test_enable_llm_check_success(app, db, users, location):
         community_id=community.id,
         check_id="llm",
     ).first()
-    assert updated_config.enabled is False
+    assert updated_config.enabled is True
 
 
-def test_disable_llm_check_success(app, db, users, location):
+def test_disable_llm_check_success(app, db, users, location, search_clear):
     """Test disabling LLM check for a specific community."""
     community_owner = users[0]
 
@@ -86,7 +86,7 @@ def test_disable_llm_check_success(app, db, users, location):
             "member_policy": "open",
             "record_policy": "open",
         },
-        "slug": "test-community",
+        "slug": "test-community-to-disable",
         "metadata": {
             "title": "Test Community",
             "description": "Community to test CLI.",
@@ -100,17 +100,20 @@ def test_disable_llm_check_success(app, db, users, location):
     community = current_communities.service.create(community_owner.identity, community_dict)
     Community.index.refresh()
 
+    db.session.flush()
+    db.session.expire_all()
+
     community_configs = CheckConfig.query.filter_by(community_id=community.id, check_id="llm").all()
     assert len(community_configs) == 1
     assert community_configs[0].enabled is True
 
     # Run the CLI command
     runner = CliRunner()
-    result = runner.invoke(checks, ["disable-llm-check", "test-community"])
+    result = runner.invoke(checks, ["disable-llm-check", "test-community-to-disable"])
 
     # Check command output
     assert result.exit_code == 0
-    assert "Disabled LLM check for community 'test-community'" in result.output
+    assert "Disabled LLM check for community 'test-community-to-disable'" in result.output
     assert "1 config(s) updated" in result.output
 
     # Verify the config is now enabled
@@ -122,7 +125,7 @@ def test_disable_llm_check_success(app, db, users, location):
     assert updated_config.enabled is False
 
 
-def test_disable_llm_check_nonexistent_community(app, db):
+def test_disable_llm_check_nonexistent_community(app, db, search_clear):
     """Test disabling LLM check for a non-existent community."""
     runner = CliRunner()
     result = runner.invoke(checks, ["disable-llm-check", "nonexistent-community"])
@@ -132,7 +135,7 @@ def test_disable_llm_check_nonexistent_community(app, db):
     assert "Error: Could not find community with slug 'nonexistent-community'" in result.output
 
 
-def test_disable_llm_check_already_disabled(app, db, users, location):
+def test_disable_llm_check_already_disabled(app, db, users, location, search_clear):
     """Test disabling LLM check that is already disabled."""
     community_owner = users[0]
 
@@ -175,7 +178,7 @@ def test_disable_llm_check_already_disabled(app, db, users, location):
     assert "Disabled LLM check for community 'already-disabled'" in result.output
 
 
-def test_update_prompts_all_communities(app, db, users, location):
+def test_update_prompts_all_communities(app, db, users, location, search_clear):
     """Test updating prompts for all communities."""
     community_owner = users[0]
 
@@ -227,8 +230,7 @@ def test_update_prompts_all_communities(app, db, users, location):
         flag_modified(check_config, "params")
         db.session.add(check_config)
 
-    db.session.commit()
-    db.session.expire_all()
+    db.session.flush()
 
     # Run the CLI command
     runner = CliRunner()
@@ -255,7 +257,7 @@ def test_update_prompts_all_communities(app, db, users, location):
         assert community_obj.metadata["title"] in updated_config.params["prompt"]
 
 
-def test_update_prompts_specific_community(app, db, users, location):
+def test_update_prompts_specific_community(app, db, users, location, search_clear):
     """Test updating prompts for a specific community only."""
     community_owner = users[0]
 

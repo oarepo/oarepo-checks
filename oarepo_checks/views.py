@@ -18,8 +18,9 @@ if TYPE_CHECKING:
     from flask import Flask
 
 
-def create_blueprint(app: Flask) -> Blueprint:
+bp = Blueprint("oarepo_checks", __name__, template_folder="templates")
+
+
+def create_blueprint(app: Flask) -> Blueprint:  # noqa: ARG001
     """Create the OARepo Checks blueprint to register templates, menu and filters."""
-    blueprint = Blueprint("oarepo_checks", __name__, template_folder="templates")
-    blueprint.app_context_processor(lambda: ({"current_app": app}))
-    return blueprint
+    return bp

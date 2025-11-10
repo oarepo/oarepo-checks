@@ -31,6 +31,17 @@ class OARepoCheckComponent(ChecksComponent):
     to run checks even when no community is assigned to the record.
     """
 
+    # NOTE: This class extend ChecksComponent from invenio-checks package.and it does not override
+    # the whole functionality. Because of that and geeneric_community return in _get_record_communities
+    # record will sometimes run checks twice instead of once (like you think on set community only).
+    # This is because the original method from parent class also fetches all previous runs of
+    # record from database and gets of all communities from them.
+    #
+    # This will be equivalent to creating record without a community,
+    # run checks with generic community and then add record to the community.
+    #
+    # This is not a problem for now and it easily can be fixed (by overriding) in future if needed
+
     def create(
         self,
         identity: Identity,  # noqa: ARG002

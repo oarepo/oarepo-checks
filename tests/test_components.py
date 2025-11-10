@@ -16,7 +16,7 @@ from invenio_communities.communities.records.api import Community
 from invenio_rdm_records.proxies import current_rdm_records_service
 
 
-def test_create_check_config_on_community_create(app, db, users, location):
+def test_create_check_config_on_community_create(app, db, users, location, search_clear):
     """Test that CheckConfig is created on community creation."""
     community_owner = users[0]
 
@@ -38,6 +38,7 @@ def test_create_check_config_on_community_create(app, db, users, location):
     }
 
     community = current_communities.service.create(community_owner.identity, community_dict)
+
     Community.index.refresh()
 
     # Verify that CheckConfig for LLM check is created
@@ -55,7 +56,7 @@ def test_create_check_config_on_community_create(app, db, users, location):
     assert "Testing policy description." in check_config_llm.params["prompt"]
 
 
-def test_create_check_config_on_community_update(app, db, users, location):
+def test_create_check_config_on_community_update(app, db, users, location, search_clear):
     """Test that CheckConfig is updated on community update."""
     community_owner = users[0]
 
@@ -103,15 +104,7 @@ def test_create_check_config_on_community_update(app, db, users, location):
 
 
 def test_run_checks_on_record_create_with_no_community(
-    app,
-    db,
-    location,
-    users,
-    community,
-    generic_community,
-    minimal_record,
-    inviter,
-    resource_type_v,
+    app, db, location, users, community, generic_community, minimal_record, inviter, resource_type_v, search_clear
 ):
     """Test that invenio-checks runs check on record creation with no community."""
     submitter = users[1]
@@ -129,14 +122,7 @@ def test_run_checks_on_record_create_with_no_community(
 
 
 def test_run_checks_on_record_update_with_no_community(
-    app,
-    db,
-    location,
-    users,
-    generic_community,
-    minimal_record,
-    inviter,
-    resource_type_v,
+    app, db, location, users, generic_community, minimal_record, inviter, resource_type_v, search_clear
 ):
     """Test that invenio-checks runs check on record creation with no community."""
     submitter = users[1]
@@ -144,6 +130,7 @@ def test_run_checks_on_record_update_with_no_community(
     # Create a draft
     service = current_rdm_records_service
     draft = service.create(submitter.identity, minimal_record)
+
     check_runs_before = CheckRun.query.filter(
         CheckRun.record_id == draft._record.id,  # noqa: SLF001
     ).all()

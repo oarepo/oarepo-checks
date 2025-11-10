@@ -59,9 +59,7 @@ packages = ["oarepo_checks"]
 
 [tool.hatch.build]
 include = [
-    "oarepo_checks/**/*.py",
-    "oarepo_checks/templates/**/*.jinja",
-    "oarepo_checks/templates/**/*.jinja2",
+    "oarepo_checks/",
 ]
 
 [tool.pytest.ini_options]

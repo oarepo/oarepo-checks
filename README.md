@@ -7,7 +7,7 @@ An extension for [invenio-checks](https://github.com/inveniosoftware/invenio-che
 This library provides:
 
 - **LLM-powered validation checks** - Validate records using configurable Large Language Models
-- **Jinja2 templates** - Define prompts using Jinja2 templates
+- **Jinja2 templates** - Define prompts using Jinja2 templates (see [TEMPLATES.md](TEMPLATES.md))
 - **Service components** - Two components for integrating checks into your Invenio application:
   - `OARepoChecksComponents` - Triggers checks on record creation
   - `RegisterCheckComponent` - Automatically creates and updates check configurations when communities are created or modified
@@ -83,9 +83,7 @@ check_config_llm = CheckConfig(
     severity=Severity.WARN,  # Since LLM make mistakes, we would like to keep them as warnings
     enabled=True,
     params={
-        "prompt_template": "oarepo_checks/llm_prompt.jinja2",
-        "repository_rules_template": "oarepo_checks/repository_rules.jinja2",
-        "community_rules_template": "oarepo_checks/community_rules.jinja2",
+        "prompt": "Some very good prompt to check for mistakes",
     },
 )
 db.session.add(check_config_llm)
@@ -100,34 +98,16 @@ You can also create prompts programmatically:
 from oarepo_checks import create_prompt
 import json
 
-# Get community (optional)
-community = current_communities.service.record_cls.pid.resolve(community_id)
-
 # Create prompt from templates
 prompt = create_prompt(
     record_serialized=json.dumps(dict(record)),
-    community=community,
+    community=community, # Community record (optional)
     # Optionally override default templates:
     # prompt_template="custom_templates/my_prompt.jinja2",
 )
 ```
 
 The prompt should instruct the LLM to return structured JSON with errors organized by sections (e.g., `metadata`, `authors`, `files`, `license`).
-
-### 4. Enable Checks on Record Creation (Optional)
-
-By default, invenio-checks runs on record updates or by using a review section under parent information. If you want to also run checks when records are first created, add the `ChecksOnCreateComponent` to your service components:
-
-```python
-from invenio_rdm_records.services.components import DefaultRecordsComponents
-from oarepo_checks.services.components.checks import ChecksOnCreateComponent
-
-# In your invenio.cfg or app configuration
-app_config["RDM_RECORDS_SERVICE_COMPONENTS"] = [
-    *DefaultRecordsComponents,
-    ChecksOnCreateComponent
-]
-```
 
 This component will trigger validation checks immediately when a new record/draft is created.
 
@@ -141,12 +121,11 @@ This component triggers LLM checks when records are created and is built on top 
 it returns generic community ID on record without communities
 which enables to run checks on records/drafts without predefined community.
 
-You need to replace Invenio ChecksComponents with OARepoChecksComponent
-in `RDM_RECORDS_SERVICE_COMPONENTS`
+You need to replace Invenio `ChecksComponents` with `OARepoChecksComponent` in `RDM_RECORDS_SERVICE_COMPONENTS`
 
 ### 2. RegisterCheckComponent
 
-This component automatically creates and updates LLM check configurations when communities are created or modified. It generates community-specific prompts using Jinja2 templates. Add it to your communities service:
+This component automatically creates and updates LLM check configurations when communities are created or modified. It generates community-specific prompts using Jinja2 templates. By default all LLM checks are **enabled**. You can disable/enable them by using CLI commands (see below). Add it to your communities service:
 
 ```python
 from invenio_communities.services.components import DefaultCommunityComponents

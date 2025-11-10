@@ -10,24 +10,12 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
-from jinja2 import Environment, FileSystemLoader
+from flask import render_template
 
 if TYPE_CHECKING:
     from invenio_communities.communities.records.api import Community
-
-
-# TODO: it should work without get loading from filesystem
-def _get_template_env() -> Environment:
-    """Get a Jinja2 environment configured for oarepo_checks templates."""
-    # Get the path to the templates directory
-    current_dir = Path(__file__).parent
-    templates_dir = current_dir / "templates"
-
-    # Create a Jinja2 environment with the FileSystemLoader
-    return Environment(loader=FileSystemLoader(str(templates_dir)), autoescape=True)
 
 
 def create_prompt(
@@ -70,25 +58,21 @@ def create_prompt(
         ... )
 
     """
-    # Get the Jinja2 environment
-    env = _get_template_env()
-
     # Render repository rules
-    repository_rules_tmpl = env.get_template(repository_rules_template)
-    repository_rules = repository_rules_tmpl.render(**extra_context)
+    repository_rules = render_template(repository_rules_template, **extra_context)
 
     # Render community rules (with community object if provided)
-    community_rules_tmpl = env.get_template(community_rules_template)
-    community_rules = community_rules_tmpl.render(
+    community_rules = render_template(
+        community_rules_template,
         community=community,
         **extra_context,
     )
 
-    # Render the final prompt
-    prompt_tmpl = env.get_template(prompt_template)
+    # Render final prompt that combines everything
     return cast(
         "str",
-        prompt_tmpl.render(
+        render_template(
+            prompt_template,
             record_serialized=record_serialized,
             repository_rules=repository_rules,
             community_rules=community_rules,

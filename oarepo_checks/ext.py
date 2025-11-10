@@ -13,6 +13,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from .views import bp
+
 if TYPE_CHECKING:
     from flask import Flask
 
@@ -29,6 +31,7 @@ class OARepoChecks:
 
     def init_app(self, app: Flask) -> None:
         """Flask application initialization."""
+        app.register_blueprint(bp)
         self.llm_clients: dict[str, BaseLLMClient] = app.config.get("OAREPO_CHECKS_LLM_CLIENTS", {})
         self.default_llm_client: str | None = app.config.get("OAREPO_CHECKS_DEFAULT_LLM_CLIENT", None)
         app.extensions["oarepo-checks"] = self

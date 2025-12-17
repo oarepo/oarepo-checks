@@ -22,7 +22,6 @@ from invenio_app.factory import create_api
 from invenio_checks.models import CheckConfig, Severity
 from invenio_communities import current_communities
 from invenio_communities.communities.records.api import Community
-from invenio_communities.communities.services.components import DefaultCommunityComponents
 from invenio_rdm_records import config
 from invenio_rdm_records.proxies import current_rdm_records_service
 from invenio_rdm_records.services.communities.components import (
@@ -37,7 +36,6 @@ from invenio_vocabularies.records.api import Vocabulary
 from werkzeug.local import LocalProxy
 
 from oarepo_checks.services.components.checks import OARepoCheckComponent
-from oarepo_checks.services.components.register_check_config import RegisterCheckComponent
 
 from .dummy_llm_client import DummyClient
 
@@ -174,7 +172,6 @@ def app_config(app_config):
 
     app_config["RDM_RECORDS_SERVICE_COMPONENTS"] = modified_records_components
     app_config["CHECKS_GENERIC_COMMUNITY"] = "generic-community"  # slug of the generic community
-    app_config["COMMUNITIES_SERVICE_COMPONENTS"] = [*DefaultCommunityComponents, RegisterCheckComponent]
 
     app_config["CELERY_TASK_ALWAYS_EAGER"] = True
     app_config["SQLALCHEMY_DATABASE_URI"] = "postgresql+psycopg2://invenio:invenio@localhost:5432/invenio"
@@ -493,3 +490,23 @@ def generic_community(db, users):
     community = current_communities.service.create(community_owner.identity, community_dict)
     Community.index.refresh()
     return community
+
+
+@pytest.fixture(scope="session")
+def model_types():
+    """Model types fixture."""
+    # Define the model types used in the tests
+    return {
+        "Metadata": {
+            "properties": {
+                "title": {"type": "keyword", "required": True},
+            }
+        }
+    }
+
+
+@pytest.fixture(scope="session")
+def model_a(model_types):
+    from .model import modela
+
+    return modela

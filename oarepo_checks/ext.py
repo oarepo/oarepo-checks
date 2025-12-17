@@ -11,7 +11,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from .views import bp
 
@@ -31,20 +31,30 @@ class OARepoChecks:
 
     def init_app(self, app: Flask) -> None:
         """Flask application initialization."""
+        self.app = app
         app.register_blueprint(bp)
-        self.llm_clients: dict[str, BaseLLMClient] = app.config.get("OAREPO_CHECKS_LLM_CLIENTS", {})
-        self.default_llm_client: str | None = app.config.get("OAREPO_CHECKS_DEFAULT_LLM_CLIENT", None)
+        self.init_config(app)
+
         app.extensions["oarepo-checks"] = self
+
+    def init_config(self, app: Flask) -> None:
+        """Initilize checks config."""
+        from invenio_communities.communities.services.components import DefaultCommunityComponents
+
+        from . import config
+
+        app.config.setdefault("CHECKS_GENERIC_COMMUNITY", config.CHECKS_GENERIC_COMMUNITY)
+        app.config.setdefault("COMMUNITIES_SERVICE_COMPONENTS", [*DefaultCommunityComponents]).extend(
+            config.CHECKS_COMMUNITIES_SERVICE_COMPONENTS
+        )
 
     @property
     def llm_client(self) -> BaseLLMClient | None:
-        """Get LLM client by name or default."""
-        if self.default_llm_client is None:
-            return None
-
-        return self.llm_clients.get(self.default_llm_client)
+        """Get defautl LLM client."""
+        default_client = self.app.config.get("OAREPO_CHECKS_DEFAULT_LLM_CLIENT", None)
+        return self.available_llm_clients.get(default_client, None) if default_client else None
 
     @property
     def available_llm_clients(self) -> dict[str, BaseLLMClient]:
         """Get available LLM clients."""
-        return self.llm_clients
+        return cast("dict[str, BaseLLMClient]", self.app.config.get("OAREPO_CHECKS_LLM_CLIENTS", {}))

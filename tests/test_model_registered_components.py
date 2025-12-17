@@ -6,11 +6,10 @@
 # oarepo-checks is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
-"""Configuration for oarepo-checks."""
-
 from __future__ import annotations
 
-from oarepo_checks.services.components.register_check_config import RegisterCheckComponent
+from oarepo_checks.services.components.checks import OARepoCheckComponent
 
-CHECKS_GENERIC_COMMUNITY = "generic-community"  # slug of the generic community
-CHECKS_COMMUNITIES_SERVICE_COMPONENTS = [RegisterCheckComponent]
+
+def test_registered_components(model_a):
+    assert OARepoCheckComponent in model_a.record_service_components

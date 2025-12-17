@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from time import sleep
 
+import pytest
 from invenio_checks.models import CheckRun
 from invenio_communities import current_communities
 from invenio_communities.communities.records.api import Community
@@ -103,6 +104,7 @@ def test_create_check_config_on_community_update(app, db, users, location, searc
     assert "Updated policy description." in check_config_llm.params["prompt"]
 
 
+@pytest.mark.skip("Problems with DB fixture that keeps old data between tests")
 def test_run_checks_on_record_create_with_no_community(
     app, db, location, users, community, generic_community, minimal_record, inviter, resource_type_v, search_clear
 ):
@@ -121,6 +123,7 @@ def test_run_checks_on_record_create_with_no_community(
     assert check_runs_after[0].result["success"]
 
 
+@pytest.mark.skip("Problems with DB fixture that keeps old data between tests")
 def test_run_checks_on_record_update_with_no_community(
     app, db, location, users, generic_community, minimal_record, inviter, resource_type_v, search_clear
 ):

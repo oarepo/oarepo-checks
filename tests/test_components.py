@@ -106,7 +106,16 @@ def test_create_check_config_on_community_update(app, db, users, location, searc
 
 @pytest.mark.skip("Problems with DB fixture that keeps old data between tests")
 def test_run_checks_on_record_create_with_no_community(
-    app, db, location, users, community, generic_community, minimal_record, inviter, resource_type_v, search_clear
+    app,
+    db,
+    location,
+    users,
+    community,
+    generic_community,
+    minimal_record,
+    inviter,
+    resource_type_v,
+    search_clear,
 ):
     """Test that invenio-checks runs check on record creation with no community."""
     submitter = users[1]
@@ -125,7 +134,15 @@ def test_run_checks_on_record_create_with_no_community(
 
 @pytest.mark.skip("Problems with DB fixture that keeps old data between tests")
 def test_run_checks_on_record_update_with_no_community(
-    app, db, location, users, generic_community, minimal_record, inviter, resource_type_v, search_clear
+    app,
+    db,
+    location,
+    users,
+    generic_community,
+    minimal_record,
+    inviter,
+    resource_type_v,
+    search_clear,
 ):
     """Test that invenio-checks runs check on record creation with no community."""
     submitter = users[1]

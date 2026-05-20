@@ -115,7 +115,9 @@ def app_config(app_config):
     app_config["RECORDS_REFRESOLVER_CLS"] = "invenio_records.resolver.InvenioRefResolver"
     app_config["RECORDS_REFRESOLVER_STORE"] = "invenio_jsonschemas.proxies.current_refresolver_store"
 
-    records_index = LocalProxy(lambda: current_rdm_records_service.record_cls.index._name)  # noqa: SLF001
+    records_index = LocalProxy(
+        lambda: current_rdm_records_service.record_cls.index._name  # noqa: SLF001
+    )
     app_config["OAISERVER_RECORD_INDEX"] = records_index
     app_config["INDEXER_DEFAULT_INDEX"] = records_index
 
@@ -184,15 +186,7 @@ def extra_entry_points():
     return {
         "invenio_base.blueprints": [
             "invenio_app_rdm_records = tests.mock_module:create_invenio_app_rdm_records_blueprint",
-            "invenio_app_rdm_requests = tests.mock_module:create_invenio_app_rdm_requests_blueprint",
-            "invenio_app_rdm_communities = tests.mock_module:create_invenio_app_rdm_communities_blueprint",
-        ],
-        "invenio_base.apps": [
-            "invenio_rdm_records = invenio_rdm_records:InvenioRDMRecords",
-        ],
-        "invenio_base.api_apps": [
-            "invenio_rdm_records = invenio_rdm_records:InvenioRDMRecords",
-        ],
+        ]
     }
 
 

@@ -44,6 +44,9 @@ llm_check = "oarepo_checks.checks.llm_check:LLMCheck"
 [project.entry-points."invenio_base.blueprints"]
 oarepo_checks = "oarepo_checks.views:bp"
 
+[project.entry-points."invenio_base.api_blueprints"]
+oarepo_checks = "oarepo_checks.views:bp"
+
 [project.entry-points."flask.commands"]
 oarepo = "oarepo_checks.cli:checks"
 

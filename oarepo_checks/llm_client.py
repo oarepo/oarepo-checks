@@ -37,8 +37,8 @@ class ChatEInfraClient(BaseLLMClient):
     def __init__(
         self,
         api_token: str,
-        api_url: str = "https://chat.ai.e-infra.cz/api/chat/completions",
-        model: str = "deepseek-r1",
+        api_url: str = "https://llm.ai.e-infra.cz/v1/chat/completions",
+        model: str = "gpt-oss-120b", #todo this changes frequently
     ):
         """Initialize the ChatEInfra client.
 

@@ -26,8 +26,8 @@ from oarepo_checks.llm_client import ChatEInfraClient
 OAREPO_CHECKS_LLM_CLIENTS = {
     "chat_einfra": ChatEInfraClient(
         api_token="your-api-token",
-        api_url="https://chat.ai.e-infra.cz/api/chat/completions",  # optional, this is default
-        model="deepseek-r1"  # optional, this is default
+        api_url="https://llm.ai.e-infra.cz/v1/chat/completions",  # optional, this is default
+        model="gpt-oss-120b"  # optional, this is default
     )
 }
 

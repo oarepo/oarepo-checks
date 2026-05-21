@@ -38,7 +38,7 @@ class ChatEInfraClient(BaseLLMClient):
         self,
         api_token: str,
         api_url: str = "https://llm.ai.e-infra.cz/v1/chat/completions",
-        model: str = "gpt-oss-120b", #todo this changes frequently
+        model: str = "gpt-oss-120b",  # TODO: this changes frequently
     ):
         """Initialize the ChatEInfra client.
 

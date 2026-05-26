@@ -35,6 +35,9 @@ class CheckServiceComponentPreset(Preset):
 
     @override
     def apply(
-        self, builder: InvenioModelBuilder, model: InvenioModel, dependencies: dict[str, Any]
+        self,
+        builder: InvenioModelBuilder,
+        model: InvenioModel,
+        dependencies: dict[str, Any],
     ) -> Generator[Customization]:
         yield AddToList("record_service_components", OARepoCheckComponent)

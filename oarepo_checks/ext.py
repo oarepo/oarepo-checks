@@ -13,8 +13,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
-from .views import bp
-
 if TYPE_CHECKING:
     from flask import Flask
 
@@ -32,14 +30,15 @@ class OARepoChecks:
     def init_app(self, app: Flask) -> None:
         """Flask application initialization."""
         self.app = app
-        app.register_blueprint(bp)
         self.init_config(app)
 
         app.extensions["oarepo-checks"] = self
 
     def init_config(self, app: Flask) -> None:
         """Initilize checks config."""
-        from invenio_communities.communities.services.components import DefaultCommunityComponents
+        from invenio_communities.communities.services.components import (
+            DefaultCommunityComponents,
+        )
 
         from . import config
 
@@ -47,6 +46,18 @@ class OARepoChecks:
         app.config.setdefault("COMMUNITIES_SERVICE_COMPONENTS", [*DefaultCommunityComponents]).extend(
             config.CHECKS_COMMUNITIES_SERVICE_COMPONENTS
         )
+
+        from invenio_rdm_records.services.components import DefaultRecordsComponents
+
+        from oarepo_checks.services.components.checks import OARepoCheckComponent
+
+        modified_records_components = DefaultRecordsComponents
+        for i, component in enumerate(modified_records_components):
+            if component.__name__ == "ChecksComponent":
+                # Replace with our custom component
+                modified_records_components[i] = OARepoCheckComponent
+
+        app.config["RDM_RECORDS_SERVICE_COMPONENTS"] = modified_records_components
 
     @property
     def llm_client(self) -> BaseLLMClient | None:
@@ -57,4 +68,7 @@ class OARepoChecks:
     @property
     def available_llm_clients(self) -> dict[str, BaseLLMClient]:
         """Get available LLM clients."""
-        return cast("dict[str, BaseLLMClient]", self.app.config.get("OAREPO_CHECKS_LLM_CLIENTS", {}))
+        return cast(
+            "dict[str, BaseLLMClient]",
+            self.app.config.get("OAREPO_CHECKS_LLM_CLIENTS", {}),
+        )

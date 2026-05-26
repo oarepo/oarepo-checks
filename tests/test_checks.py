@@ -18,7 +18,15 @@ from invenio_records_resources.services.uow import (
 
 
 def test_run_checks_on_draft_update_no_generic_community(
-    app, db, location, users, community, minimal_record, inviter, resource_type_v, search_clear
+    app,
+    db,
+    location,
+    users,
+    community,
+    minimal_record,
+    inviter,
+    resource_type_v,
+    search_clear,
 ):
     """Test that invenio-checks runs validation on community submission."""
     submitter = users[1]
@@ -58,7 +66,16 @@ def test_run_checks_on_draft_update_no_generic_community(
 
 
 def test_run_checks_on_draft_update_multiple_checks(
-    app, db, location, users, community, minimal_record, inviter, resource_type_v, create_metadata_check, search_clear
+    app,
+    db,
+    location,
+    users,
+    community,
+    minimal_record,
+    inviter,
+    resource_type_v,
+    create_metadata_check,
+    search_clear,
 ):
     """Test that invenio-checks runs validation on community submission."""
     submitter = users[1]

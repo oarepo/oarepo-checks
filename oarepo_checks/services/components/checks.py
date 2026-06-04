@@ -44,12 +44,33 @@ class OARepoCheckComponent(ChecksComponent):
 
     def create(
         self,
-        identity: Identity,  # noqa: ARG002
-        data: dict[str, Any] | None = None,  # noqa: ARG002
+        identity: Identity,
+        data: dict[str, Any] | None = None,
         record: Record | None = None,
-        **kwargs: Any,  # noqa: ARG002
+        **kwargs: Any,
+    ) -> None:
+        """Skip checks when record is created."""
+
+    def update_draft(
+        self,
+        identity: Identity,
+        data: dict[str, Any] | None = None,
+        record: Record | None = None,
+        errors: list | None = None,
+        **kwargs: Any,
+    ) -> None:
+        """Skip checks when a draft is updated."""
+
+    def edit(
+        self, identity: Identity, draft: Record | None = None, record: Record | None = None, **kwargs: Any
+    ) -> None:
+        """Skip checks when record is edited."""
+
+    def submit_record(
+        self, identity: Identity, data: dict[str, Any] | None = None, record: Record | None = None, **kwargs: Any
     ) -> None:
         """Run checks on draft create."""
+        _, _, _ = data, identity, kwargs
         draft = record  # rename for clarity
 
         # Take into account already included communities
@@ -61,6 +82,11 @@ class OARepoCheckComponent(ChecksComponent):
             run = ChecksAPI.run_check(config, draft, self.uow)
             if run:
                 updated_runs.append(run)
+
+    def publish(
+        self, identity: Identity, draft: Record | None = None, record: Record | None = None, **kwargs: Any
+    ) -> None:
+        """Skip checks when record is published."""
 
     def _get_record_communities(self, record_or_draft: Record | None) -> set[str]:
         """Override method to return generic community when no community is present on record."""

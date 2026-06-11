@@ -9,10 +9,10 @@ description = "An extension library for invenio-checks"
 readme = "README.md"
 license = "MIT"
 dependencies = [
-    "oarepo[rdm,tests]>=14,<15",
+    "oarepo[rdm,tests]>=14.2.1b11.dev1,<15.0.0",
     "oarepo-invenio-typing-stubs>=0.1.0",   # dependency on Descriptor for typed system fields
-    "invenio_checks>=9.0.0,<10.0.0",
-    "oarepo-model>=3.0.0,<4.0.0",
+    "invenio_checks>=10.0.0,<11.0.0",
+    "oarepo-model>=4.0.0,<5.0.0",
 ]
 requires-python = ">=3.14,<3.15"
 

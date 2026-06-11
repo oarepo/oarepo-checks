@@ -16,8 +16,6 @@ from typing import TYPE_CHECKING
 from invenio_checks.base import Check
 from invenio_checks.contrib.metadata.check import CheckResult
 
-from oarepo_checks.proxies import current_oarepo_checks
-
 if TYPE_CHECKING:
     from invenio_checks.models import CheckConfig
     from invenio_records.api import Record
@@ -56,14 +54,13 @@ class LLMCheck(Check):
 
         # TODO: check for prompt length (depending on the LLM used) so we are not out of context window
 
-        # Use the LLM client to get the response
-        if current_oarepo_checks.llm_client is None:
-            raise RuntimeError("No LLM client configured for oarepo-checks")
+        from oarepo_checks.tasks import run_llm_check
 
-        json_with_errors = current_oarepo_checks.llm_client.chat_completion(prompt)
-
-        errors = self.parse_errors(json_with_errors)
-        result.errors.extend(errors)
+        run_llm_check.delay(
+            prompt=prompt,
+            record_id=str(record.id),
+            config_id=str(config.id),
+        )
 
         return result
 

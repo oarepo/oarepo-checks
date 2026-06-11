@@ -53,9 +53,6 @@ oarepo_checks = "oarepo_checks.views:bp"
 [project.entry-points."flask.commands"]
 oarepo = "oarepo_checks.cli:checks"
 
-[tool.hatch.version]
-path = "oarepo_checks/__init__.py"
-
 [tool.hatch.build.targets.sdist]
 include = [
     "/oarepo_checks",

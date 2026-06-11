@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "oarepo-checks"
-dynamic = ["version"]
+version = "1.0.0"
 description = "An extension library for invenio-checks"
 readme = "README.md"
 license = "MIT"
@@ -52,9 +52,6 @@ oarepo_checks = "oarepo_checks.views:bp"
 
 [project.entry-points."flask.commands"]
 oarepo = "oarepo_checks.cli:checks"
-
-[tool.hatch.version]
-path = "oarepo_checks/__init__.py"
 
 [tool.hatch.build.targets.sdist]
 include = [

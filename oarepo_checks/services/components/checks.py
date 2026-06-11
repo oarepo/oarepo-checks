@@ -62,12 +62,20 @@ class OARepoCheckComponent(ChecksComponent):
         """Skip checks when a draft is updated."""
 
     def edit(
-        self, identity: Identity, draft: Record | None = None, record: Record | None = None, **kwargs: Any
+        self,
+        identity: Identity,
+        draft: Record | None = None,
+        record: Record | None = None,
+        **kwargs: Any,
     ) -> None:
         """Skip checks when record is edited."""
 
     def submit_record(
-        self, identity: Identity, data: dict[str, Any] | None = None, record: Record | None = None, **kwargs: Any
+        self,
+        identity: Identity,
+        data: dict[str, Any] | None = None,
+        record: Record | None = None,
+        **kwargs: Any,
     ) -> None:
         """Run checks on draft create."""
         _, _, _ = data, identity, kwargs
@@ -84,7 +92,11 @@ class OARepoCheckComponent(ChecksComponent):
                 updated_runs.append(run)
 
     def publish(
-        self, identity: Identity, draft: Record | None = None, record: Record | None = None, **kwargs: Any
+        self,
+        identity: Identity,
+        draft: Record | None = None,
+        record: Record | None = None,
+        **kwargs: Any,
     ) -> None:
         """Skip checks when record is published."""
 

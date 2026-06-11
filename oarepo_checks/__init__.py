@@ -24,9 +24,9 @@ except PackageNotFoundError:
     __version__ = "0.0.0dev0+unknown"
 
 __all__ = (
-    "__version__",
     "LLMCheck",
     "OARepoCheckComponent",
     "RegisterCheckComponent",
+    "__version__",
     "create_prompt",
 )

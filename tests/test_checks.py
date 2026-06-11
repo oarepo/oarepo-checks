@@ -90,7 +90,10 @@ def test_run_llm_check_in_background_on_submit_to_community(
         uow.register(ParentRecordCommitOp(record.parent, indexer_context={"service": service}))
         uow.register(RecordIndexOp(record, indexer=service.indexer, index_refresh=True))
 
-    review_data = {"type": CommunitySubmission.type_id, "receiver": {"community": community.id}}
+    review_data = {
+        "type": CommunitySubmission.type_id,
+        "receiver": {"community": community.id},
+    }
     service.review.update(submitter.identity, draft.id, review_data)
 
     check_runs_before = CheckRun.query.filter(

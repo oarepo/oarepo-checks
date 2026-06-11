@@ -11,14 +11,20 @@
 
 from __future__ import annotations
 
+from importlib.metadata import PackageNotFoundError, version
+
 from .checks.llm_check import LLMCheck
 from .services.components.checks import OARepoCheckComponent
 from .services.components.register_check_config import RegisterCheckComponent
 from .utils import create_prompt
 
-__version__ = "0.1.0"
+try:
+    __version__ = version("oarepo-checks")
+except PackageNotFoundError:
+    __version__ = "0.0.0dev0+unknown"
 
 __all__ = (
+    "__version__",
     "LLMCheck",
     "OARepoCheckComponent",
     "RegisterCheckComponent",

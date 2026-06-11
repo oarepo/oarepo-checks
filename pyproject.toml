@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "oarepo-checks"
-dynamic = ["version"]
+version = "1.0.0"
 description = "An extension library for invenio-checks"
 readme = "README.md"
 license = "MIT"

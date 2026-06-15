@@ -73,7 +73,7 @@ class OARepoChecks:
             return
 
         env = oarepo_config.load_configuration_variables()
-        api_token = env.INVENIO_OAREPO_CHECKS_TOKEN
+        api_token = env.get("INVENIO_OAREPO_CHECKS_TOKEN")
         if not api_token:
             return
 

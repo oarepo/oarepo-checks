@@ -11,13 +11,16 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
+from invenio_access.permissions import system_identity
 from invenio_checks.base import Check
 from invenio_checks.contrib.metadata.check import CheckResult
+from oarepo_runtime.proxies import current_runtime
 
 if TYPE_CHECKING:
     from invenio_checks.models import CheckConfig
+    from invenio_drafts_resources.services import RecordService
     from invenio_records.api import Record
 
 
@@ -25,8 +28,8 @@ class LLMCheck(Check):
     """Check for validating record using LLM."""
 
     id = "llm"
-    title = "LLM validation"
-    description = "Validates record using LLM."
+    title = "AI validation"
+    description = "Validates record using AI."
 
     def validate_config(self, config: CheckConfig) -> bool:
         """Validate the configuration for this metadata check."""
@@ -43,14 +46,26 @@ class LLMCheck(Check):
     def run(self, record: Record, config: CheckConfig) -> CheckResult:
         """Run the metadata check on a record with the given configuration."""
         # Create a check result
-        result = CheckResult(self.id)
+        result = CheckResult(self.id, sync=False)
 
         # Serialize the record
-        serialized_full_record = json.dumps(dict(record))
+        model = current_runtime.get_model_for_record(record)
+        try:
+            svc = cast("RecordService", model.service)
+            serialized_full_record = svc.read_draft(system_identity, record["id"], expand=True).to_dict()
+        except Exception:  # noqa: BLE001
+            # fallback to serializing the record manually (might not contain some fields)
+            json_record = dict(record)
+            if hasattr(record, "files"):
+                files = record["files"]
+                json_record["files"] = {
+                    key: {"size": f.file.size if f.file else None} for key, f in files.entries.items()
+                }
+            serialized_full_record = json.dumps(json_record)
 
         # Get the pre-rendered prompt from config and replace the record placeholder
         prompt = config.params.get("prompt", "")
-        prompt = prompt.replace("{{record_serialized}}", serialized_full_record)
+        prompt = prompt.replace("{{record_serialized}}", json.dumps(serialized_full_record))
 
         # TODO: check for prompt length (depending on the LLM used) so we are not out of context window
 

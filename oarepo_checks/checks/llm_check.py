@@ -50,18 +50,13 @@ class LLMCheck(Check):
         result = CheckResult(self.id, sync=False)
 
         # Serialize the record
-        model = current_runtime.get_model_for_record(record)
         try:
+            model = current_runtime.get_model_for_record(record)
             svc = cast("RecordService", model.service)
             serialized_full_record = svc.read_draft(system_identity, record["id"], expand=True).to_dict()
-        except Exception:  # noqa: BLE001
+        except:  # noqa: E722
             # fallback to serializing the record manually (might not contain some fields)
             json_record = dict(record)
-            if hasattr(record, "files"):
-                files = record["files"]
-                json_record["files"] = {
-                    key: {"size": f.file.size if f.file else None} for key, f in files.entries.items()
-                }
             serialized_full_record = json.dumps(json_record)
 
         # Get the pre-rendered prompt from config and replace the record placeholder

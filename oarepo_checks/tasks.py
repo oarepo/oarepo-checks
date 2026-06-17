@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import logging
 import uuid
 from datetime import UTC, datetime
 
@@ -21,6 +22,8 @@ from invenio_db import db
 
 from oarepo_checks.checks.llm_check import LLMCheck
 from oarepo_checks.proxies import current_oarepo_checks
+
+log = logging.getLogger(__name__)
 
 
 def _find_check_run(
@@ -62,8 +65,18 @@ def run_llm_check(
     db.session.add(run)
     db.session.commit()
 
+    log.info(
+        "Running LLM check task for record %s config %s prompt %s",
+        record_id,
+        config_id,
+        prompt,
+    )
+
     try:
         json_with_errors = current_oarepo_checks.llm_client.chat_completion(prompt)  # type: ignore[union-attr]
+
+        log.info("LLM response: %s", json_with_errors)
+
         errors = LLMCheck().parse_errors(json_with_errors)
 
         result = CheckResult(LLMCheck.id)

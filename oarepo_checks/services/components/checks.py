@@ -60,6 +60,11 @@ class OARepoCheckComponent(ChecksComponent):
         **kwargs: Any,
     ) -> None:
         """Skip checks when a draft is updated."""
+        past_runs = ChecksAPI.get_runs(record)
+        if not past_runs:
+            return
+
+        super().update_draft(identity, data, record, errors, **kwargs)
 
     def edit(
         self,
@@ -69,6 +74,11 @@ class OARepoCheckComponent(ChecksComponent):
         **kwargs: Any,
     ) -> None:
         """Skip checks when record is edited."""
+        past_runs = ChecksAPI.get_runs(record) + ChecksAPI.get_runs(draft)
+        if not past_runs:
+            return
+
+        super().edit(identity, draft, record, **kwargs)
 
     def submit_record(
         self,

@@ -34,7 +34,7 @@ def configure_llm(  # noqa: PLR0913
     client_name: str = OAREPO_CHECKS_DEFAULT_CHAT_EINFRA_CLIENT,
     api_url: str = "https://llm.ai.e-infra.cz/v1/chat/completions",
     model: str = "gpt-oss-120b",
-    fallback_community: str = "restricted",
+    fallback_community: str = "llm-settings-community",
     llm_clients: Mapping[str, BaseLLMClient] | None = None,
     default_client: str | None = None,
 ) -> None:

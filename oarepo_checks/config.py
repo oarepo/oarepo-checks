@@ -13,17 +13,19 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from oarepo.config.base import set_constants_in_caller
-from oarepo_checks.llm_client import BaseLLMClient, ChatEInfraClient
 
+from oarepo_checks.llm_client import BaseLLMClient, ChatEInfraClient
 from oarepo_checks.services.components.register_check_config import (
     RegisterCheckComponent,
 )
+
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
 CHECKS_GENERIC_COMMUNITY = "generic-community"  # slug of the generic community
 CHECKS_COMMUNITIES_SERVICE_COMPONENTS = [RegisterCheckComponent]
 OAREPO_CHECKS_DEFAULT_CHAT_EINFRA_CLIENT = "chat_einfra"
+
 
 def configure_llm(  # noqa: PLR0913
     api_token: str | None = None,

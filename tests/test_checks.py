@@ -11,11 +11,12 @@ from __future__ import annotations
 from invenio_checks.models import CheckRun
 from invenio_drafts_resources.services.records.uow import ParentRecordCommitOp
 from invenio_rdm_records.proxies import current_rdm_records_service
-from invenio_rdm_records.requests.community_submission import CommunitySubmission
 from invenio_records_resources.services.uow import (
     RecordIndexOp,
     UnitOfWork,
 )
+
+from oarepo_checks.requests import _run_llm_check
 
 
 def test_do_not_run_checks_on_draft_update(
@@ -72,7 +73,6 @@ def test_run_llm_check_in_background_on_submit_to_community(
     users,
     community,
     minimal_record,
-    inviter,
     resource_type_v,
     search_clear,
     monkeypatch,
@@ -80,28 +80,18 @@ def test_run_llm_check_in_background_on_submit_to_community(
     """Test that LLM check is queued only when submitting a draft to a community."""
     submitter = users[1]
 
-    inviter(submitter.id, community.id, "curator")
-
+    app.config["CHECKS_GENERIC_COMMUNITY"] = community.data["slug"]
     service = current_rdm_records_service
     draft = service.create(submitter.identity, minimal_record)
     record = draft._record  # noqa: SLF001
-    record.parent.communities.add(community.data["id"], default=True)
-    with UnitOfWork(db.session) as uow:
-        uow.register(ParentRecordCommitOp(record.parent, indexer_context={"service": service}))
-        uow.register(RecordIndexOp(record, indexer=service.indexer, index_refresh=True))
-
-    review_data = {
-        "type": CommunitySubmission.type_id,
-        "receiver": {"community": community.id},
-    }
-    service.review.update(submitter.identity, draft.id, review_data)
 
     check_runs_before = CheckRun.query.filter(
         CheckRun.record_id == draft._record.id,  # noqa: SLF001
     ).all()
     assert len(check_runs_before) == 0
 
-    service.review.submit(submitter.identity, draft.id, require_review=True)
+    with UnitOfWork(db.session) as uow:
+        _run_llm_check(record, uow)
 
     check_runs_after = CheckRun.query.filter(
         CheckRun.record_id == draft._record.id,  # noqa: SLF001

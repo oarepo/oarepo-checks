@@ -35,3 +35,39 @@ msgid ""
 "AI validation is in progress. Please refresh the page in a minute to see the"
 " results."
 msgstr ""
+
+#: /Users/m/Workspaces/repositories/feat-convert-old-catchall/oarepo-checks/oarepo_checks/templates/invenio_checks/requests/llm_tab.html:68
+msgid "Edit draft"
+msgstr ""
+
+#: /Users/m/Workspaces/repositories/feat-convert-old-catchall/oarepo-checks/oarepo_checks/templates/invenio_checks/requests/llm_tab.html:53
+msgid "Editing in progress"
+msgstr ""
+
+#: /Users/m/Workspaces/repositories/feat-convert-old-catchall/oarepo-checks/oarepo_checks/templates/invenio_checks/requests/llm_tab.html:54
+msgid "You're viewing checks and feedback results for unpublished changes."
+msgstr ""
+
+#: /Users/m/Workspaces/repositories/feat-convert-old-catchall/oarepo-checks/oarepo_checks/templates/invenio_checks/requests/llm_tab.html:56
+msgid ""
+"The published version available to users may differ from what's shown here."
+msgstr ""
+
+#: /Users/m/Workspaces/repositories/feat-convert-old-catchall/oarepo-checks/oarepo_checks/templates/invenio_checks/requests/llm_tab.html:62
+msgid "What is this about?"
+msgstr ""
+
+#: /Users/m/Workspaces/repositories/feat-convert-old-catchall/oarepo-checks/oarepo_checks/templates/invenio_checks/requests/llm_tab.html:63
+msgid ""
+"These checks help ensure that your submission is compliant with this "
+"repository's guidelines."
+msgstr ""
+
+#: /Users/m/Workspaces/repositories/feat-convert-old-catchall/oarepo-checks/oarepo_checks/templates/invenio_checks/requests/llm_tab.html:65
+msgid "How do I fix warnings/errors?"
+msgstr ""
+
+#: /Users/m/Workspaces/repositories/feat-convert-old-catchall/oarepo-checks/oarepo_checks/templates/invenio_checks/requests/llm_tab.html:66
+msgid ""
+"Click on the \"Edit draft\" button to make changes and fix warnings/errors."
+msgstr ""

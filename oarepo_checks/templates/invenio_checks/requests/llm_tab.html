@@ -48,6 +48,26 @@
     </div>
 
     <div class="six wide column">
-        {% include 'invenio_checks/requests/help_message.html' %}
+        {% if record._record.is_draft or record._record.has_draft %}
+        <div class="ui warning message">
+            <div class="header"><i class="attention icon"></i> {% trans %}Editing in progress{% endtrans %}</div>
+            <p>{% trans %}You're viewing checks and feedback results for unpublished changes.{% endtrans %}</p>
+            {% if record._record.is_published %}
+            <p>{% trans %}The published version available to users may differ from what's shown here.{% endtrans %}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="ui info message">
+            <div class="header">{% trans %}What is this about?{% endtrans %}</div>
+            <p>{% trans %}These checks help ensure that your submission is compliant with this repository's guidelines.{% endtrans %}</p>
+            {% if record._record.is_draft or record._record.has_draft %}
+            <h5 class="ui header">{% trans %}How do I fix warnings/errors?{% endtrans %}</h5>
+            <p>{% trans %}Click on the "Edit draft" button to make changes and fix warnings/errors.{% endtrans %}</p>
+            <a class="ui primary small button" href="{{ record_ui.links.self_html }}" target="_blank" rel="noopener noreferrer">
+                <i class="edit icon"></i>{% trans %}Edit draft{% endtrans %}
+            </a>
+            {% endif %}
+        </div>
     </div>
 </div>

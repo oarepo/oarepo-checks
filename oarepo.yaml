@@ -1,0 +1,7 @@
+i18n:
+  babel_output_translations: oarepo_checks/translations
+  babel_source_paths:
+    - oarepo_checks
+  languages:
+    - cs
+    - en

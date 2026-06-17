@@ -43,6 +43,7 @@ class RegisterCheckComponent(ServiceComponent):
         # Use placeholder for record_serialized since it will be replaced at check time
         return create_prompt(
             record_serialized="{{record_serialized}}",
+            language="{{language}}",
             community=community,
         )
 

@@ -55,6 +55,12 @@ class OARepoChecks:
             config.CHECKS_COMMUNITIES_SERVICE_COMPONENTS
         )
 
+        from oarepo_requests.types.publish_draft import PublishDraftRequestType
+
+        from oarepo_checks.requests import LLMPublishDraftSubmitAction
+
+        PublishDraftRequestType.submit_action = LLMPublishDraftSubmitAction
+
         from invenio_rdm_records.services.components import DefaultRecordsComponents
 
         from oarepo_checks.services.components.checks import OARepoCheckComponent

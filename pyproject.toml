@@ -13,6 +13,7 @@ dependencies = [
     "oarepo-invenio-typing-stubs>=0.1.0",   # dependency on Descriptor for typed system fields
     "invenio_checks>=10.0.0,<11.0.0",
     "oarepo-model>=5.0.0,<6.0.0",
+    "oarepo-requests>=9.0.0,<10.0.0",
 ]
 requires-python = ">=3.14,<3.15"
 
@@ -51,7 +52,10 @@ oarepo_checks = "oarepo_checks.views:bp"
 oarepo_checks = "oarepo_checks.views:bp"
 
 [project.entry-points."flask.commands"]
-oarepo = "oarepo_checks.cli:checks"
+checks = "oarepo_checks.cli:checks"
+
+[project.entry-points."invenio_i18n.translations"]
+oarepo_checks = "oarepo_checks"
 
 [tool.hatch.build.targets.sdist]
 include = [

@@ -189,6 +189,7 @@ def update_prompts(community_slug: str | None = None) -> None:
             # Generate new prompt
             new_prompt = create_prompt(
                 record_serialized="{{record_serialized}}",
+                language="{{language}}",
                 community=community,
             )
 

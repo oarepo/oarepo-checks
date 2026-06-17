@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, cast
 from invenio_access.permissions import system_identity
 from invenio_checks.base import Check
 from invenio_checks.contrib.metadata.check import CheckResult
+from invenio_i18n import get_locale
 from oarepo_runtime.proxies import current_runtime
 
 if TYPE_CHECKING:
@@ -66,6 +67,7 @@ class LLMCheck(Check):
         # Get the pre-rendered prompt from config and replace the record placeholder
         prompt = config.params.get("prompt", "")
         prompt = prompt.replace("{{record_serialized}}", json.dumps(serialized_full_record))
+        prompt = prompt.replace("{{language}}", str(get_locale()))
 
         # TODO: check for prompt length (depending on the LLM used) so we are not out of context window
 

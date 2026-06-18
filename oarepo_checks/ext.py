@@ -13,10 +13,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
-from oarepo import config as oarepo_config
-
-from oarepo_checks.llm_client import ChatEInfraClient
-
 if TYPE_CHECKING:
     from flask import Flask
 

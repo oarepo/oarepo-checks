@@ -67,6 +67,19 @@ class OARepoChecks:
                 modified_records_components[i] = OARepoCheckComponent
 
         app.config["RDM_RECORDS_SERVICE_COMPONENTS"] = modified_records_components
+        self.init_ui_config()
+
+    def init_ui_config(self) -> None:
+        """Register checks UI component."""
+        from oarepo_rdm.ui.config import RDMRecordsUIResourceConfig
+
+        from oarepo_checks.ui import ChecksUIErrorsComponent
+
+        if ChecksUIErrorsComponent not in RDMRecordsUIResourceConfig.components:
+            RDMRecordsUIResourceConfig.components = (
+                *RDMRecordsUIResourceConfig.components,
+                ChecksUIErrorsComponent,
+            )
 
     @property
     def llm_client(self) -> BaseLLMClient | None:

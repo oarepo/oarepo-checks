@@ -32,13 +32,18 @@
 
                 {% for error in ((check.result or {}).errors or [])%}
                     <div class="item">
-                        <div class="content" title="{{ check.field }}">
+                        <div class="content" title="{{ error.field }}">
                             {% for msg in error.messages %}
-                            <div class="header">{{ msg.error_short | safe }}</div>
-
-                            <div class="pt-5 text-muted">
-                                {{ msg.error_long | safe }}
-                            </div>
+                                {% if msg.error_long or msg.error_short %}
+                                    {% if msg.error_short %}
+                                        <div class="header">{{ msg.error_short }}</div>
+                                    {% endif %}
+                                    {% if msg.error_long %}
+                                        <div class="pt-5 text-muted">{{ msg.error_long }}</div>
+                                    {% endif %}
+                                {% else %}
+                                    <div class="pt-5 text-muted">{{ msg }}</div>
+                                {% endif %}
                             {% endfor %}
                         </div>
                     </div>

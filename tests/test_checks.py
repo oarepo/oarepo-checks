@@ -9,12 +9,8 @@
 from __future__ import annotations
 
 from invenio_checks.models import CheckRun
-from invenio_drafts_resources.services.records.uow import ParentRecordCommitOp
 from invenio_rdm_records.proxies import current_rdm_records_service
-from invenio_records_resources.services.uow import (
-    RecordIndexOp,
-    UnitOfWork,
-)
+from invenio_records_resources.services.uow import UnitOfWork
 
 from oarepo_checks.requests import _run_llm_check
 
@@ -30,6 +26,7 @@ def test_do_not_run_checks_on_draft_update(
     resource_type_v,
     create_metadata_check,
     search_clear,
+    model_a,
 ):
     """Test that invenio-checks does not run validation on draft update."""
     submitter = users[1]
@@ -40,14 +37,6 @@ def test_do_not_run_checks_on_draft_update(
     # Create a draft
     service = current_rdm_records_service
     draft = service.create(submitter.identity, minimal_record)
-
-    # Add community to the parent record
-    record = draft._record  # noqa: SLF001
-    record.parent.communities.add(community.data["id"], default=True)
-    with UnitOfWork(db.session) as uow:
-        uow.register(ParentRecordCommitOp(record.parent, indexer_context={"service": service}))
-
-        uow.register(RecordIndexOp(record, indexer=service.indexer, index_refresh=True))
 
     # Verify Checks in Database before update
     check_runs_before = CheckRun.query.filter(
@@ -67,15 +56,7 @@ def test_do_not_run_checks_on_draft_update(
 
 
 def test_run_llm_check_in_background_on_submit_to_community(
-    app,
-    db,
-    location,
-    users,
-    community,
-    minimal_record,
-    resource_type_v,
-    search_clear,
-    monkeypatch,
+    app, db, location, users, community, minimal_record, resource_type_v, search_clear, monkeypatch, model_a
 ):
     """Test that LLM check is queued only when submitting a draft to a community."""
     submitter = users[1]

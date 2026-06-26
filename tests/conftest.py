@@ -180,16 +180,6 @@ def app_config(app_config):
     return app_config
 
 
-@pytest.fixture(scope="module")
-def extra_entry_points():
-    """Extra entrypoints."""
-    return {
-        "invenio_base.blueprints": [
-            "invenio_app_rdm_records = tests.mock_module:create_invenio_app_rdm_records_blueprint",
-        ]
-    }
-
-
 @pytest.fixture
 def minimal_record():
     """Minimal record data as dict coming from the external world."""

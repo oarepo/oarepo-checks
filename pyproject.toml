@@ -14,6 +14,7 @@ dependencies = [
     "invenio_checks>=10.0.0,<11.0.0",
     "oarepo-model>=5.0.0,<6.0.0",
     "oarepo-requests>=9.0.0,<10.0.0",
+    "oarepo-rdm>=8.0.0,<9.0.0"
 ]
 requires-python = ">=3.14,<3.15"
 

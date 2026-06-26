@@ -78,18 +78,46 @@ class LLMCheck(Check):
 
     def parse_errors(self, llm_output: str) -> list[dict]:
         """Create error messages for the UI."""
-        json_output = json.loads(llm_output)
+        try:
+            json_output = json.loads(llm_output)
+        except json.JSONDecodeError:
+            return []
+
+        if not isinstance(json_output, dict):
+            return []
 
         output = []
 
         for path, info in json_output.items():
-            if info.get("section_empty"):
+            if not isinstance(info, dict):
+                continue
+
+            errors = info.get("errors")
+
+            if not isinstance(errors, list) or not errors:
+                continue
+
+            valid_errors = []
+
+            for error in errors:
+                if not isinstance(error, dict):
+                    continue
+
+                valid_errors.append(
+                    {
+                        "error_short": str(error.get("error_short", "")),
+                        "error_long": str(error.get("error_long", "")),
+                        "manual_check_needed": bool(error.get("manual_check_needed", True)),
+                    }
+                )
+
+            if not valid_errors:
                 continue
 
             output.append(
                 {
                     "field": path,
-                    "messages": info["errors"],
+                    "messages": valid_errors,
                     "description": "LLM generated errors. Proceed with caution.",
                     "severity": "warning",
                 }

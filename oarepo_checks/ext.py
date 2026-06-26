@@ -76,7 +76,7 @@ class OARepoChecks:
         from oarepo_checks.ui import ChecksUIErrorsComponent
 
         if ChecksUIErrorsComponent not in RDMRecordsUIResourceConfig.components:
-            RDMRecordsUIResourceConfig.components = (
+            RDMRecordsUIResourceConfig.components = (  # pyright: ignore[reportAttributeAccessIssue]
                 *RDMRecordsUIResourceConfig.components,
                 ChecksUIErrorsComponent,
             )

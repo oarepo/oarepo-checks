@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Any, cast
 
 from flask import current_app
@@ -21,6 +22,8 @@ from invenio_communities import current_communities
 if TYPE_CHECKING:
     from flask_principal import Identity
     from invenio_records import Record
+
+logger = logging.getLogger("oarepo_checks")
 
 
 class OARepoCheckComponent(ChecksComponent):
@@ -63,7 +66,7 @@ class OARepoCheckComponent(ChecksComponent):
         past_runs = ChecksAPI.get_runs(record)
         if not past_runs:
             return
-
+        logger.info("Running checks for draft update on record %s", record["id"] if record else None)
         super().update_draft(identity, data, record, errors, **kwargs)
 
     def edit(
@@ -78,6 +81,7 @@ class OARepoCheckComponent(ChecksComponent):
         if not past_runs:
             return
 
+        logger.info("Running checks for edit metadata on record %s", record["id"] if record else None)
         super().edit(identity, draft, record, **kwargs)
 
     def submit_record(
@@ -96,8 +100,15 @@ class OARepoCheckComponent(ChecksComponent):
 
         updated_runs = []
         configs = ChecksAPI.get_configs(community_ids)
+        logger.info(
+            "Running checks for submit_record on record %s, community_ids=%s, configs=%s",
+            record["id"] if record else None,
+            community_ids,
+            configs,
+        )
         for config in configs:
             run = ChecksAPI.run_check(config, draft, self.uow)
+            logger.info("Running check %s, result=%s", config, run)
             if run:
                 updated_runs.append(run)
 

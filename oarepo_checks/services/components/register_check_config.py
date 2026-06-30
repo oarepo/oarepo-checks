@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Any
 
 from invenio_checks.models import CheckConfig, Severity
@@ -22,6 +23,8 @@ from oarepo_checks.utils import create_prompt
 if TYPE_CHECKING:
     from flask_principal import Identity
     from invenio_records import Record
+
+logger = logging.getLogger("oarepo_checks")
 
 
 class RegisterCheckComponent(ServiceComponent):
@@ -57,6 +60,8 @@ class RegisterCheckComponent(ServiceComponent):
         """Run on community create."""
         community = record  # rename for clarity
 
+        logger.info("Creating check config for community %s", community)
+
         # Generate the prompt with community-specific information
         prompt = self._create_prompt_for_community(community)
 
@@ -71,6 +76,7 @@ class RegisterCheckComponent(ServiceComponent):
             )
 
             db.session.add(check_config_llm)
+            logger.info("Check config for community %s added to the database", community)
 
     def update(
         self,
@@ -81,6 +87,8 @@ class RegisterCheckComponent(ServiceComponent):
     ) -> None:
         """Run on community update."""
         community = record  # rename for clarity
+
+        logger.info("Updating check config for community %s", community)
 
         existing_configs = []
 
@@ -101,6 +109,7 @@ class RegisterCheckComponent(ServiceComponent):
                 params={"prompt": prompt},
             )
             db.session.add(check_config_llm)
+            logger.info("Check config for community %s updated", community)
 
         for existing_config in existing_configs:
             # Regenerate prompt with updated community data
@@ -109,3 +118,4 @@ class RegisterCheckComponent(ServiceComponent):
             # Mark the JSON field as modified so SQLAlchemy detects the change
             flag_modified(existing_config, "params")
             db.session.add(existing_config)
+            logger.info("Check config for community %s updated", community)

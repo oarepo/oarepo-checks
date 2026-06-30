@@ -18,10 +18,14 @@ from invenio_access.permissions import system_identity
 from invenio_checks.api import ChecksAPI
 from invenio_checks.components import ChecksComponent
 from invenio_communities import current_communities
+from invenio_rdm_records.records import RDMDraft, RDMRecord
+from sqlalchemy.exc import NoResultFound
 
 if TYPE_CHECKING:
     from flask_principal import Identity
+    from invenio_rdm_records.records.api import RDMParent
     from invenio_records import Record
+
 
 logger = logging.getLogger("oarepo_checks")
 
@@ -124,6 +128,19 @@ class OARepoCheckComponent(ChecksComponent):
     def _get_record_communities(self, record_or_draft: Record | None) -> set[str]:
         """Override method to return generic community when no community is present on record."""
         communities = cast("set", super()._get_record_communities(record_or_draft))
+
+        # check review request and add communities from the request
+        try:
+            if record_or_draft is not None and isinstance(record_or_draft, (RDMRecord, RDMDraft)):
+                record_parent = cast("RDMParent", record_or_draft.parent)
+                if record_parent.review and record_parent.review.receiver:  # type: ignore[reportAttributeAccessIssue]
+                    community = record_parent.review.receiver.resolve()  # type: ignore[reportAttributeAccessIssue]
+                    communities.add(str(community.id))
+                    if community.parent:
+                        communities.add(str(community.parent.id))
+        except NoResultFound:
+            pass
+
         if communities:
             return communities
 

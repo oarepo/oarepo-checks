@@ -78,6 +78,7 @@ def create_prompt(
     # Render repository rules
     repository_rules = render_template(repository_rules_template, **extra_context)
 
+
     # Render community rules (with community object if provided)
     community_rules = render_template(
         community_rules_template,

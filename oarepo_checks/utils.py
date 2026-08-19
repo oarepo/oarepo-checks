@@ -18,6 +18,28 @@ if TYPE_CHECKING:
     from invenio_communities.communities.records.api import Community
 
 
+def check_error_messages(messages: list[Any]) -> list[str]:
+    """Convert check messages to the list[str] shape expected by deposit forms."""
+    normalized_messages = []
+    for message in messages or []:
+        if isinstance(message, str):
+            normalized_messages.append(message)
+            continue
+
+        if isinstance(message, dict):
+            text = (
+                message.get("message")
+                or message.get("error")
+                or message.get("error_long")
+                or message.get("error_short")
+            )
+            normalized_messages.append(str(text or message))
+            continue
+
+        normalized_messages.append(str(message))
+    return normalized_messages
+
+
 def create_prompt(
     record_serialized: str,
     community: Community | dict | None = None,

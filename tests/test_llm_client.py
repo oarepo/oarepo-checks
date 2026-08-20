@@ -11,16 +11,20 @@ REQUEST_DATA = {}
 
 class Response:
     def __init__(self, content):
+        #pridano
         self.content = content
 
     def raise_for_status(self):
+        #pridano
         pass
 
     def json(self):
+        #pridano
         return {"choices": [{"message": {"content": self.content}}]}
 
 
 def post(url, headers, json, timeout):
+    #pridano
     REQUEST_CALLS.append(
         {
             "url": url,
@@ -33,11 +37,13 @@ def post(url, headers, json, timeout):
 
 
 def post_default_model(url, headers, json, timeout):
+    #pridano
     REQUEST_DATA.update(json)
     return Response("{}")
 
 
 def test_llm_client(monkeypatch):
+    #pridano
     REQUEST_CALLS.clear()
     REQUEST_DATA.clear()
     monkeypatch.setattr(requests, "post", post)
@@ -81,4 +87,3 @@ def test_llm_client(monkeypatch):
 
     assert client.chat_completion("prompt") == "{}"
     assert REQUEST_DATA["model"] == "default-model"
-

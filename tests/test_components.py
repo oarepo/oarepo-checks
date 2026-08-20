@@ -3,13 +3,18 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from time import sleep
 
 import pytest
 from invenio_checks.models import CheckRun
+from invenio_checks.components import ChecksComponent
 from invenio_communities import current_communities
 from invenio_communities.communities.records.api import Community
 from invenio_rdm_records.proxies import current_rdm_records_service
+
+from oarepo_checks.services.components import checks as checks_module
+from oarepo_checks.services.components.checks import OARepoCheckComponent
 
 
 def test_create_check_config_on_community_create(app, db, users, location, search_clear):
@@ -97,6 +102,53 @@ def test_create_check_config_on_community_update(app, db, users, location, searc
     ).first()
     assert str(check_config_llm.community_id) == str(community.id)
     assert "Updated policy description." in check_config_llm.params["prompt"]
+
+
+
+def test_generic_community(monkeypatch):
+    calls = []
+    monkeypatch.setattr(ChecksComponent, "_get_record_communities", lambda self, record: set())
+    monkeypatch.setattr(checks_module, "current_app", SimpleNamespace(config={"CHECKS_GENERIC_COMMUNITY": "generic"}))
+    monkeypatch.setattr(
+        checks_module,
+        "current_communities",
+        SimpleNamespace(
+            service=SimpleNamespace(
+                search=lambda identity, params: calls.append(("search", params))
+                or SimpleNamespace(hits=[{"id": "generic-community-id"}])
+            )
+        ),
+    )
+
+    component = OARepoCheckComponent(None)
+
+    assert component._get_record_communities({"id": "record-id"}) == {"generic-community-id"}
+    assert calls == [("search", {"q": "slug:generic"})]
+
+
+def test_submit_record(monkeypatch):
+    calls = []
+    record = {"id": "record-id"}
+    monkeypatch.setattr(OARepoCheckComponent, "_get_record_communities", lambda self, record: {"community-id"})
+    monkeypatch.setattr(
+        checks_module,
+        "ChecksAPI",
+        SimpleNamespace(
+            get_configs=lambda community_ids: calls.append(("get_configs", community_ids)) or ["config-1", "config-2"],
+            run_check=lambda config, draft, uow: calls.append(("run_check", config, draft, uow)) or f"run-{config}",
+        ),
+    )
+
+    component = OARepoCheckComponent(None)
+    component.uow = "uow"
+
+    component.submit_record(identity=None, data={}, record=record)
+
+    assert calls == [
+        ("get_configs", {"community-id"}),
+        ("run_check", "config-1", record, "uow"),
+        ("run_check", "config-2", record, "uow"),
+    ]
 
 
 @pytest.mark.skip("Problems with DB fixture that keeps old data between tests")

@@ -9,15 +9,18 @@ from oarepo_checks import tasks
 
 
 def tesd_filter(monkeypatch):
+    #pridano
     record_id = uuid.uuid4()
     config_id = uuid.uuid4()
 
     class Query:
         def filter_by(self, **kwargs):
+            #pridano
             self.kwargs = kwargs
             return self
 
         def one_or_none(self):
+            #pridano
             return "check-run"
 
     query = Query()
@@ -28,6 +31,7 @@ def tesd_filter(monkeypatch):
 
 
 def test_llm_check_update(monkeypatch):
+    #pridano
     run = SimpleNamespace()
     commits = []
     prompts = []
@@ -39,6 +43,7 @@ def test_llm_check_update(monkeypatch):
     )
 
     def chat_completion(prompt):
+        #pridano
         prompts.append(prompt)
         return '{"metadata.title": {"errors": [{"error_short": "Bad title"}]}}'
 
@@ -55,6 +60,7 @@ def test_llm_check_update(monkeypatch):
 
 
 def test_llm_check_failure(monkeypatch):
+    #pridano
     run = SimpleNamespace()
     commits = []
     rollbacks = []
@@ -66,6 +72,7 @@ def test_llm_check_failure(monkeypatch):
     )
 
     def chat_completion(prompt):
+        #pridano
         raise RuntimeError("LLM failed")
 
     monkeypatch.setattr(tasks, "_find_check_run", lambda **kwargs: run)

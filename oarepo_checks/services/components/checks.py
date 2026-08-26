@@ -128,8 +128,8 @@ class OARepoCheckComponent(ChecksComponent):
         try:
             if record_or_draft is not None and isinstance(record_or_draft, (RDMRecord, RDMDraft)):
                 record_parent = cast("RDMParent", record_or_draft.parent)
-                if record_parent.review and record_parent.review.receiver:  # type: ignore[reportAttributeAccessIssue]
-                    community = record_parent.review.receiver.resolve()  # type: ignore[reportAttributeAccessIssue]
+                if record_parent.review and record_parent.review.receiver:  # ty: ignore[unresolved-attribute]
+                    community = record_parent.review.receiver.resolve()  # ty: ignore[unresolved-attribute]
                     communities.add(str(community.id))
                     if community.parent:
                         communities.add(str(community.parent.id))

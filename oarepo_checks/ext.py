@@ -48,7 +48,7 @@ class OARepoChecks:
 
         from oarepo_checks.requests import LLMPublishDraftSubmitAction
 
-        PublishDraftRequestType.submit_action = LLMPublishDraftSubmitAction
+        PublishDraftRequestType.submit_action = LLMPublishDraftSubmitAction  # ty: ignore[invalid-assignment]
 
         from invenio_rdm_records.services.components import DefaultRecordsComponents
 
@@ -70,7 +70,7 @@ class OARepoChecks:
         from oarepo_checks.ui import ChecksUIErrorsComponent
 
         if ChecksUIErrorsComponent not in RDMRecordsUIResourceConfig.components:
-            RDMRecordsUIResourceConfig.components = (  # pyright: ignore[reportAttributeAccessIssue]
+            RDMRecordsUIResourceConfig.components = (  # ty: ignore[invalid-assignment]
                 *RDMRecordsUIResourceConfig.components,
                 ChecksUIErrorsComponent,
             )

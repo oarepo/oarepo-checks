@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 CESNET z.s.p.o.
+# SPDX-License-Identifier: MIT
+
 
 from __future__ import annotations
 
@@ -5,7 +8,6 @@ from oarepo_checks.utils import check_error_messages, create_prompt
 
 
 def test_check_error_message():
-    #pridano
     messages = [
         "plain error",
         {"message": "message text"},
@@ -27,9 +29,7 @@ def test_check_error_message():
     ]
 
 
-
 def test_check_prompt(app):
-    #pridano
     community = {
         "metadata": {
             "title": "Test Community",

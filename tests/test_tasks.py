@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 CESNET z.s.p.o.
+# SPDX-License-Identifier: MIT
+
 from __future__ import annotations
 
 import uuid
@@ -8,30 +11,26 @@ import pytest
 from oarepo_checks import tasks
 
 
-def tesd_filter(monkeypatch):
-    #pridano
+def test_filter(monkeypatch):
     record_id = uuid.uuid4()
     config_id = uuid.uuid4()
 
     class Query:
         def filter_by(self, **kwargs):
-            #pridano
             self.kwargs = kwargs
             return self
 
         def one_or_none(self):
-            #pridano
             return "check-run"
 
     query = Query()
-    monkeypatch.setattr(tasks.CheckRun, "query", query)
+    monkeypatch.setattr(tasks, "CheckRun", SimpleNamespace(query=query))
 
     assert tasks._find_check_run(record_id=str(record_id), config_id=str(config_id)) == "check-run"
     assert query.kwargs == {"record_id": record_id, "config_id": config_id}
 
 
 def test_llm_check_update(monkeypatch):
-    #pridano
     run = SimpleNamespace()
     commits = []
     prompts = []
@@ -43,13 +42,14 @@ def test_llm_check_update(monkeypatch):
     )
 
     def chat_completion(prompt):
-        #pridano
         prompts.append(prompt)
         return '{"metadata.title": {"errors": [{"error_short": "Bad title"}]}}'
 
     monkeypatch.setattr(tasks, "_find_check_run", lambda **kwargs: run)
     monkeypatch.setattr(tasks, "db", SimpleNamespace(session=session))
-    monkeypatch.setattr(tasks, "current_oarepo_checks", SimpleNamespace(llm_client=SimpleNamespace(chat_completion=chat_completion)))
+    monkeypatch.setattr(
+        tasks, "current_oarepo_checks", SimpleNamespace(llm_client=SimpleNamespace(chat_completion=chat_completion))
+    )
 
     tasks.run_llm_check.run(prompt="prompt", record_id=str(uuid.uuid4()), config_id=str(uuid.uuid4()))
 
@@ -60,7 +60,6 @@ def test_llm_check_update(monkeypatch):
 
 
 def test_llm_check_failure(monkeypatch):
-    #pridano
     run = SimpleNamespace()
     commits = []
     rollbacks = []
@@ -72,13 +71,16 @@ def test_llm_check_failure(monkeypatch):
     )
 
     def chat_completion(prompt):
-        #pridano
         raise RuntimeError("LLM failed")
 
     monkeypatch.setattr(tasks, "_find_check_run", lambda **kwargs: run)
     monkeypatch.setattr(tasks, "db", SimpleNamespace(session=session))
-    monkeypatch.setattr(tasks, "current_oarepo_checks", SimpleNamespace(llm_client=SimpleNamespace(chat_completion=chat_completion)))
-    monkeypatch.setattr(tasks, "current_app", SimpleNamespace(logger=SimpleNamespace(exception=lambda *args, **kwargs: None)))
+    monkeypatch.setattr(
+        tasks, "current_oarepo_checks", SimpleNamespace(llm_client=SimpleNamespace(chat_completion=chat_completion))
+    )
+    monkeypatch.setattr(
+        tasks, "current_app", SimpleNamespace(logger=SimpleNamespace(exception=lambda *args, **kwargs: None))
+    )
 
     with pytest.raises(RuntimeError, match="LLM failed"):
         tasks.run_llm_check.run(prompt="prompt", record_id=str(uuid.uuid4()), config_id=str(uuid.uuid4()))

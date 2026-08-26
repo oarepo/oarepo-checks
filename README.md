@@ -27,7 +27,7 @@ OAREPO_CHECKS_LLM_CLIENTS = {
     "chat_einfra": ChatEInfraClient(
         api_token="your-api-token",
         api_url="https://llm.ai.e-infra.cz/v1/chat/completions",  # optional, this is default
-        model="gpt-oss-120b"  # optional, this is default
+        model="gpt-oss-120b",  # optional, this is default
     )
 }
 
@@ -42,6 +42,7 @@ You can create custom clients by inheriting from `BaseLLMClient`:
 ```python
 from oarepo_checks.llm_client import BaseLLMClient
 import requests
+
 
 class CustomLLMClient(BaseLLMClient):
     def __init__(self, api_key: str, endpoint: str):
@@ -58,13 +59,9 @@ class CustomLLMClient(BaseLLMClient):
         # Your implementation here
         ...
 
+
 # Register in configuration
-OAREPO_CHECKS_LLM_CLIENTS = {
-    "custom": CustomLLMClient(
-        api_key="your-key",
-        endpoint="https://your-llm-api.com/chat"
-    )
-}
+OAREPO_CHECKS_LLM_CLIENTS = {"custom": CustomLLMClient(api_key="your-key", endpoint="https://your-llm-api.com/chat")}
 ```
 
 ### 3. Manually Configure the Check
@@ -101,7 +98,7 @@ import json
 # Create prompt from templates
 prompt = create_prompt(
     record_serialized=json.dumps(dict(record)),
-    community=community, # Community record (optional)
+    community=community,  # Community record (optional)
     # Optionally override default templates:
     # prompt_template="custom_templates/my_prompt.jinja2",
 )
@@ -132,10 +129,7 @@ from invenio_communities.services.components import DefaultCommunityComponents
 from oarepo_checks.services.components.register_check_config import RegisterCheckComponent
 
 # In your invenio.cfg or app configuration
-app_config["COMMUNITIES_SERVICE_COMPONENTS"] = [
-    *DefaultCommunityComponents,
-    RegisterCheckComponent
-]
+app_config["COMMUNITIES_SERVICE_COMPONENTS"] = [*DefaultCommunityComponents, RegisterCheckComponent]
 ```
 
 When a community is created, this component:

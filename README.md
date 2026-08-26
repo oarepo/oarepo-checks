@@ -15,27 +15,37 @@ This library provides:
 
 ## Configuration
 
-### 1. Define LLM Clients
+### 1. Define LLM Client
 
-Configure one or more LLM clients in your Invenio application configuration:
+  Configure the LLM client through `oarepo-config`:
 
 ```python
-from oarepo_checks.llm_client import ChatEInfraClient
+  from oarepo_config import config
 
-# In your invenio.cfg or app configuration
-OAREPO_CHECKS_LLM_CLIENTS = {
-    "chat_einfra": ChatEInfraClient(
-        api_token="your-api-token",
-        api_url="https://llm.ai.e-infra.cz/v1/chat/completions",  # optional, this is default
-        model="gpt-oss-120b",  # optional, this is default
-    )
-}
-
-# Set the default client to use
-OAREPO_CHECKS_DEFAULT_LLM_CLIENT = "chat_einfra"
+  config.configure_llm(
+      api_token="token",
+  )
 ```
+  Available parameters:
 
-### 2. Creating Custom LLM Clients
+  - api_token (required) - API token used by the LLM provider. Commonly loaded from INVENIO_OAREPO_CHECKS_TOKEN.
+  - enabled (default: True) - Enables or disables LLM checks configuration.
+  - client_name (default: "chat_einfra") - Name under which the client is registered.
+  - api_url (default:  "https://llm.ai.e-infra.cz/v1/chat/completions") - Chat completion endpoint URL.
+  - model (default:  "mini") - Model used for completions.
+  - fallback_community (default: None) - Community slug used when a record has no community.
+  - as_default (default: True) - Sets the registered client as the default OARepo Checks LLM client.
+
+LLM checks are configured per community. If a record is not submitted to a real community, OARepo Checks can use a configured fallback community instead.
+
+
+### 3. When LLM Checks Run
+
+LLM checks are executed asynchronously. When a draft is submitted to a community, the check configuration for that community is used and the LLM validation runs in the background.
+
+For records submitted through the publish workflow without a community, the LLM check is triggered when the submit-to-publish request is created. In this case, the configured fallback community is used.
+
+### 4. Creating Custom LLM Clients
 
 You can create custom clients by inheriting from `BaseLLMClient`:
 
@@ -64,7 +74,7 @@ class CustomLLMClient(BaseLLMClient):
 OAREPO_CHECKS_LLM_CLIENTS = {"custom": CustomLLMClient(api_key="your-key", endpoint="https://your-llm-api.com/chat")}
 ```
 
-### 3. Manually Configure the Check
+### 5. Manually Configure the Check
 
 The LLM check uses Jinja2 templates for flexible prompt configuration. You can either use the default templates or create custom ones.
 
@@ -112,7 +122,7 @@ This component will trigger validation checks immediately when a new record/draf
 
 This library provides two service components to integrate checks into your Invenio application:
 
-### 1. OARepoChecksComponents
+### 1. OARepoCheckComponents
 
 This component triggers LLM checks when records are created and is built on top of Invenio ChecksComponent. Furthermore
 it returns generic community ID on record without communities
@@ -188,7 +198,6 @@ The LLM should return JSON in similar structure:
 ```json
 {
   "metadata.title": {                                                   # path for that specific field
-    "section_empty": false,                                             # LLM found some errors
     "errors": [
       {
         "error_short": "Brief error description",                       # provide a short and long description
@@ -199,17 +208,6 @@ The LLM should return JSON in similar structure:
   },
   "metadata.license": {
     "section_empty": true,                                              # if no errors are found by the LLM, then it set section_empty = True to know that LLM still checked this section
-    "errors": []
   }
 }
 ```
-
-## Requirements
-
-- Python >= 3.13
-- invenio-checks >= 2.0.0
-- oarepo >= 14.0.0
-
-## License
-
-MIT License - see LICENSE file for details.

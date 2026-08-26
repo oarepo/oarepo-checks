@@ -32,12 +32,12 @@ class LLMCheck(Check):
     def validate_config(self, config: CheckConfig) -> bool:
         """Validate the configuration for this metadata check."""
         if not isinstance(config, dict):
-            raise TypeError(_("Configuration must be a dictionary"))
+            raise TypeError("Configuration must be a dictionary")
 
         # Check for prompt string
         prompt = config.get("prompt")
         if not prompt or not isinstance(prompt, str):
-            raise ValueError(_("Configuration must contain a 'prompt' string"))
+            raise ValueError("Configuration must contain a 'prompt' string")
 
         return True
 
@@ -69,8 +69,8 @@ class LLMCheck(Check):
             result.errors.append(
                 {
                     "field": "files",
-                    "messages": [_("The record is too large for AI validation.")],
-                    "description": _("AI validation was skipped."),
+                    "messages": ["The record is too large for AI validation."],
+                    "description": "AI validation was skipped.",
                     "severity": "warning",
                 }
             )
@@ -134,7 +134,7 @@ class LLMCheck(Check):
                 {
                     "field": path,
                     "messages": valid_errors,
-                    "description": _("LLM generated errors. Proceed with caution."),
+                    "description": "LLM generated errors. Proceed with caution.",
                     "severity": "warning",
                 }
             )

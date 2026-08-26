@@ -105,23 +105,3 @@ msgstr "Ověření pomocí AI"
 #: /Users/alzbetapokorna/cesnet/2026/refaktor14/oarepo-checks/oarepo_checks/checks/llm_check.py:29
 msgid "Validates record using AI."
 msgstr "Ověří záznam pomocí umělé inteligence."
-
-#: /Users/alzbetapokorna/cesnet/2026/refaktor14/oarepo-checks/oarepo_checks/checks/llm_check.py:34
-msgid "Configuration must be a dictionary"
-msgstr "Konfigurace musí být typu „dictionary”"
-
-#: /Users/alzbetapokorna/cesnet/2026/refaktor14/oarepo-checks/oarepo_checks/checks/llm_check.py:39
-msgid "Configuration must contain a 'prompt' string"
-msgstr "Konfigurace musí obsahovat řetězec „prompt“"
-
-#: /Users/alzbetapokorna/cesnet/2026/refaktor14/oarepo-checks/oarepo_checks/checks/llm_check.py:117
-msgid "LLM generated errors. Proceed with caution."
-msgstr "Model zaznamenal chyby. Postupujte obezřetně."
-
-#: /Users/alzbetapokorna/cesnet/2026/refaktor14/oarepo-checks/oarepo_checks/checks/llm_check.py:72
-msgid "The record is too large for AI validation."
-msgstr "Záznam je příliš velký pro ověření pomocí AI."
-
-#: /Users/alzbetapokorna/cesnet/2026/refaktor14/oarepo-checks/oarepo_checks/checks/llm_check.py:73
-msgid "AI validation was skipped."
-msgstr "Ověření pomocí AI bylo přeskočeno."

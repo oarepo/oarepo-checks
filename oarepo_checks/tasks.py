@@ -68,7 +68,7 @@ def run_llm_check(
     )
 
     try:
-        json_with_errors = current_oarepo_checks.llm_client.chat_completion(prompt)  # type: ignore[union-attr]
+        json_with_errors = current_oarepo_checks.llm_client.chat_completion(prompt)  # ty: ignore[unresolved-attribute]
 
         log.info("LLM response: %s", json_with_errors)
 

@@ -107,7 +107,7 @@ class RegisterCheckComponent(ServiceComponent):
             # Create new config with generated prompt
             prompt = self._create_prompt_for_community(community)
             check_config_llm = CheckConfig(
-                community_id=community.id,  # type: ignore[union-attr]
+                community_id=community.id,  # ty: ignore[unresolved-attribute]
                 check_id="llm",
                 severity=Severity.WARN,
                 enabled=True,

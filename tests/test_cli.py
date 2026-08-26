@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
-import pytest
 from click.testing import CliRunner
 from flask import Flask
 from invenio_checks.models import CheckConfig
@@ -352,10 +351,15 @@ def test_cli_enable(monkeypatch):
     config = SimpleNamespace(enabled=False)
     community = {"id": "community-id", "metadata": {"title": "Community"}}
 
+    def commit():
+        commits.append(True)
+
     monkeypatch.setattr(
         cli_module,
         "current_communities",
-        SimpleNamespace(service=SimpleNamespace(search=lambda identity, params=None: SimpleNamespace(hits=[community]))),
+        SimpleNamespace(
+            service=SimpleNamespace(search=lambda identity, params=None: SimpleNamespace(hits=[community]))
+        ),
     )
     monkeypatch.setattr(
         cli_module,
@@ -365,7 +369,7 @@ def test_cli_enable(monkeypatch):
     monkeypatch.setattr(
         cli_module,
         "db",
-        SimpleNamespace(session=SimpleNamespace(add=lambda value: added.append(value), commit=lambda: commits.append(True))),
+        SimpleNamespace(session=SimpleNamespace(add=added.append, commit=commit)),
     )
 
     with app.app_context():
@@ -403,12 +407,14 @@ def test_cli_no_community(monkeypatch):
     monkeypatch.setattr(
         cli_module,
         "current_communities",
-        SimpleNamespace(service=SimpleNamespace(search=lambda identity, params=None: SimpleNamespace(hits=[{"id": "id"}]))),
+        SimpleNamespace(
+            service=SimpleNamespace(search=lambda identity, params=None: SimpleNamespace(hits=[{"id": "id"}]))
+        ),
     )
     monkeypatch.setattr(
         cli_module,
         "CheckConfig",
-        SimpleNamespace(query=SimpleNamespace(filter_by=lambda **kwargs: SimpleNamespace(all=lambda: []))),
+        SimpleNamespace(query=SimpleNamespace(filter_by=lambda **kwargs: SimpleNamespace(all=list))),
     )
 
     with app.app_context():
@@ -427,6 +433,9 @@ def test_cli_update_prompts(monkeypatch):
     community_two = {"id": "two", "metadata": {"title": "Community Two"}}
     config_one = SimpleNamespace(params={"prompt": "old one"})
     config_two = SimpleNamespace(params={"prompt": "old two"})
+
+    def commit():
+        commits.append(True)
 
     monkeypatch.setattr(
         cli_module,
@@ -453,7 +462,7 @@ def test_cli_update_prompts(monkeypatch):
     monkeypatch.setattr(
         cli_module,
         "db",
-        SimpleNamespace(session=SimpleNamespace(add=lambda value: added.append(value), commit=lambda: commits.append(True))),
+        SimpleNamespace(session=SimpleNamespace(add=added.append, commit=commit)),
     )
     monkeypatch.setattr(cli_module, "flag_modified", lambda value, field: flagged.append((value, field)))
     monkeypatch.setattr(

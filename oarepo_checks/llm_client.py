@@ -86,7 +86,7 @@ class ChatEInfraClient(BaseLLMClient):
         # Merge any additional kwargs
         data.update(kwargs)
 
-        response = requests.post(self.api_url, headers=headers, json=data, timeout=60)  # noqa: S113
+        response = requests.post(self.api_url, headers=headers, json=data, timeout=60)
         response.raise_for_status()  # Raise exception for bad status codes
 
         response_json = response.json()

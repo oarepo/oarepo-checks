@@ -103,23 +103,23 @@ def create_app_rdm_blueprint(app):
         __name__,
     )
 
-    def record_file_download(pid_value, file_item=None, is_preview=False, **kwargs):  # noqa: ANN003, ANN202
+    def record_file_download(pid_value, file_item=None, is_preview=False, **kwargs):
         """Fake record_file_download view function."""
         return "<file content>"
 
-    def record_detail(pid_value, file_item=None, is_preview=False, **kwargs):  # noqa: ANN003, ANN202
+    def record_detail(pid_value, file_item=None, is_preview=False, **kwargs):
         """Fake record_detail view function."""
         return "<record detail>"
 
-    def deposit_edit(pid_value, file_item=None, is_preview=False, **kwargs):  # noqa: ANN003, ANN202
+    def deposit_edit(pid_value, file_item=None, is_preview=False, **kwargs):
         """Fake record_detail view function."""
         return "<deposit edit>"
 
-    def record_latest(record=None, **kwargs):  # noqa: ANN003, ANN202
+    def record_latest(record=None, **kwargs):
         """Fake record_latest view function."""
         return "<record latest>"
 
-    def record_from_pid(record=None, **kwargs):  # noqa: ANN003, ANN202
+    def record_from_pid(record=None, **kwargs):
         """Fake record_from_pid view function."""
         return "<record from pid>"
 

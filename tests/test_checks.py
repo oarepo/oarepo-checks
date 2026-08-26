@@ -35,7 +35,7 @@ def test_do_not_run_checks_on_draft_update(
 
     # Verify Checks in Database before update
     check_runs_before = CheckRun.query.filter(
-        CheckRun.record_id == draft._record.id,  # noqa: SLF001
+        CheckRun.record_id == draft._record.id,
     ).all()
     assert len(check_runs_before) == 0
 
@@ -44,7 +44,7 @@ def test_do_not_run_checks_on_draft_update(
     _ = service.update_draft(submitter.identity, draft.id, minimal_record)
 
     check_runs_after = CheckRun.query.filter(
-        CheckRun.record_id == draft._record.id,  # noqa: SLF001
+        CheckRun.record_id == draft._record.id,
     ).all()
 
     assert len(check_runs_after) == 0
@@ -59,10 +59,10 @@ def test_run_llm_check_in_background_on_submit_to_community(
     app.config["CHECKS_GENERIC_COMMUNITY"] = community.data["slug"]
     service = current_rdm_records_service
     draft = service.create(submitter.identity, minimal_record)
-    record = draft._record  # noqa: SLF001
+    record = draft._record
 
     check_runs_before = CheckRun.query.filter(
-        CheckRun.record_id == draft._record.id,  # noqa: SLF001
+        CheckRun.record_id == draft._record.id,
     ).all()
     assert len(check_runs_before) == 0
 
@@ -70,7 +70,7 @@ def test_run_llm_check_in_background_on_submit_to_community(
         _run_llm_check(record, uow)
 
     check_runs_after = CheckRun.query.filter(
-        CheckRun.record_id == draft._record.id,  # noqa: SLF001
+        CheckRun.record_id == draft._record.id,
     ).all()
 
     assert len(check_runs_after) == 1

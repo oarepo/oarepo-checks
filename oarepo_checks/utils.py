@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 from flask import render_template
 
@@ -78,7 +78,6 @@ def create_prompt(
     # Render repository rules
     repository_rules = render_template(repository_rules_template, **extra_context)
 
-
     # Render community rules (with community object if provided)
     community_rules = render_template(
         community_rules_template,
@@ -87,14 +86,11 @@ def create_prompt(
     )
 
     # Render final prompt that combines everything
-    return cast(
-        "str",
-        render_template(
-            prompt_template,
-            record_serialized=record_serialized,
-            repository_rules=repository_rules,
-            community_rules=community_rules,
-            community=community,
-            **extra_context,
-        ),
+    return render_template(
+        prompt_template,
+        record_serialized=record_serialized,
+        repository_rules=repository_rules,
+        community_rules=community_rules,
+        community=community,
+        **extra_context,
     )

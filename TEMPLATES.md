@@ -74,7 +74,7 @@ record_json = json.dumps(dict(record))
 # Create prompt
 prompt = create_prompt(
     record_serialized=record_json,
-    community=community, # community record
+    community=community,  # community record
     # Optionally override template paths:
     # prompt_template="my_custom_templates/prompt.jinja2",
     # repository_rules_template="my_custom_templates/repo_rules.jinja2",

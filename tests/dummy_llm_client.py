@@ -15,8 +15,8 @@ class DummyClient(BaseLLMClient):
 
     def chat_completion(
         self,
-        prompt: str,  # noqa: ARG002
-        **kwargs: Any,  # noqa: ARG002
+        prompt: str,
+        **kwargs: Any,
     ) -> str:
         """Get chat completion from the LLM."""
         return """{

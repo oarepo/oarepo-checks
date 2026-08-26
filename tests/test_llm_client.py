@@ -1,30 +1,32 @@
+# SPDX-FileCopyrightText: 2026 CESNET z.s.p.o.
+# SPDX-License-Identifier: MIT
+
 from __future__ import annotations
 
 import requests
 
 from oarepo_checks.llm_client import ChatEInfraClient
 
-
 REQUEST_CALLS = []
 REQUEST_DATA = {}
 
 
 class Response:
+    """Fake HTTP response for request mocking."""
+
     def __init__(self, content):
-        #pridano
+        """Initialize the fake response."""
         self.content = content
 
     def raise_for_status(self):
-        #pridano
-        pass
+        """Simulate a successful HTTP response."""
 
     def json(self):
-        #pridano
+        """Return dummy json data."""
         return {"choices": [{"message": {"content": self.content}}]}
 
 
 def post(url, headers, json, timeout):
-    #pridano
     REQUEST_CALLS.append(
         {
             "url": url,
@@ -37,19 +39,17 @@ def post(url, headers, json, timeout):
 
 
 def post_default_model(url, headers, json, timeout):
-    #pridano
     REQUEST_DATA.update(json)
     return Response("{}")
 
 
 def test_llm_client(monkeypatch):
-    #pridano
     REQUEST_CALLS.clear()
     REQUEST_DATA.clear()
     monkeypatch.setattr(requests, "post", post)
 
     client = ChatEInfraClient(
-        api_token="token",
+        api_token="token",  # noqa: S106
         api_url="https://example.test/chat",
         model="default-model",
     )
@@ -83,7 +83,7 @@ def test_llm_client(monkeypatch):
 
     monkeypatch.setattr(requests, "post", post_default_model)
 
-    client = ChatEInfraClient(api_token="token", model="default-model")
+    client = ChatEInfraClient(api_token="token", model="default-model")  # noqa: S106
 
     assert client.chat_completion("prompt") == "{}"
     assert REQUEST_DATA["model"] == "default-model"

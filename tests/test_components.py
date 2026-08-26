@@ -3,12 +3,12 @@
 
 from __future__ import annotations
 
-from types import SimpleNamespace
 from time import sleep
+from types import SimpleNamespace
 
 import pytest
-from invenio_checks.models import CheckRun
 from invenio_checks.components import ChecksComponent
+from invenio_checks.models import CheckRun
 from invenio_communities import current_communities
 from invenio_communities.communities.records.api import Community
 from invenio_rdm_records.proxies import current_rdm_records_service
@@ -104,7 +104,6 @@ def test_create_check_config_on_community_update(app, db, users, location, searc
     assert "Updated policy description." in check_config_llm.params["prompt"]
 
 
-
 def test_generic_community(monkeypatch):
     calls = []
     monkeypatch.setattr(ChecksComponent, "_get_record_communities", lambda self, record: set())
@@ -114,8 +113,9 @@ def test_generic_community(monkeypatch):
         "current_communities",
         SimpleNamespace(
             service=SimpleNamespace(
-                search=lambda identity, params: calls.append(("search", params))
-                or SimpleNamespace(hits=[{"id": "generic-community-id"}])
+                search=lambda identity, params: (
+                    calls.append(("search", params)) or SimpleNamespace(hits=[{"id": "generic-community-id"}])
+                )
             )
         ),
     )
@@ -172,7 +172,7 @@ def test_run_checks_on_record_create_with_no_community(
     draft = service.create(submitter.identity, minimal_record)
 
     check_runs_after = CheckRun.query.filter(
-        CheckRun.record_id == draft._record.id,  # noqa: SLF001
+        CheckRun.record_id == draft._record.id,
     ).all()
     assert len(check_runs_after) == 1
     assert str(check_runs_after[0].config.community_id) == generic_community.id
@@ -199,7 +199,7 @@ def test_run_checks_on_record_update_with_no_community(
     draft = service.create(submitter.identity, minimal_record)
 
     check_runs_before = CheckRun.query.filter(
-        CheckRun.record_id == draft._record.id,  # noqa: SLF001
+        CheckRun.record_id == draft._record.id,
     ).all()
     end_time_before = check_runs_before[0].end_time
     assert len(check_runs_before) == 1
@@ -213,7 +213,7 @@ def test_run_checks_on_record_update_with_no_community(
 
     # It should be updated run
     check_runs_after = CheckRun.query.filter(
-        CheckRun.record_id == draft._record.id,  # noqa: SLF001
+        CheckRun.record_id == draft._record.id,
     ).all()
     assert len(check_runs_after) == 1
     assert str(check_runs_after[0].config.community_id) == generic_community.id

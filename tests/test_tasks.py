@@ -9,6 +9,7 @@ from types import SimpleNamespace
 import pytest
 
 from oarepo_checks import tasks
+from oarepo_checks.checks import llm_check as llm_check_module
 
 
 def test_filter(monkeypatch):
@@ -50,6 +51,7 @@ def test_llm_check_update(monkeypatch):
     monkeypatch.setattr(
         tasks, "current_oarepo_checks", SimpleNamespace(llm_client=SimpleNamespace(chat_completion=chat_completion))
     )
+    monkeypatch.setattr(llm_check_module, "current_app", SimpleNamespace(config={}))
 
     tasks.run_llm_check.run(prompt="prompt", record_id=str(uuid.uuid4()), config_id=str(uuid.uuid4()))
 

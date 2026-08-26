@@ -104,3 +104,11 @@ msgstr ""
 #: /Users/alzbetapokorna/cesnet/2026/refaktor14/oarepo-checks/oarepo_checks/checks/llm_check.py:117
 msgid "LLM generated errors. Proceed with caution."
 msgstr ""
+
+#: /Users/alzbetapokorna/cesnet/2026/refaktor14/oarepo-checks/oarepo_checks/checks/llm_check.py:72
+msgid "The record is too large for AI validation."
+msgstr ""
+
+#: /Users/alzbetapokorna/cesnet/2026/refaktor14/oarepo-checks/oarepo_checks/checks/llm_check.py:73
+msgid "AI validation was skipped."
+msgstr ""

@@ -8,12 +8,13 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING, cast
 
+from flask import current_app
 from invenio_access.permissions import system_identity
 from invenio_checks.base import Check
 from invenio_checks.contrib.metadata.check import CheckResult
 from invenio_i18n import get_locale
-from oarepo_runtime.proxies import current_runtime
 from invenio_i18n import lazy_gettext as _
+from oarepo_runtime.proxies import current_runtime
 
 if TYPE_CHECKING:
     from invenio_checks.models import CheckConfig
@@ -25,7 +26,7 @@ class LLMCheck(Check):
     """Check for validating record using LLM."""
 
     id = "llm"
-    title =  _("AI validation")
+    title = _("AI validation")
     description = _("Validates record using AI.")
 
     def validate_config(self, config: CheckConfig) -> bool:
@@ -60,7 +61,20 @@ class LLMCheck(Check):
         prompt = prompt.replace("{{record_serialized}}", json.dumps(serialized_full_record))
         prompt = prompt.replace("{{language}}", str(get_locale()))
 
-        # TODO: check for prompt length (depending on the LLM used) so we are not out of context window
+        max_prompt_chars = current_app.config.get(
+            "OAREPO_CHECKS_MAX_LLM_INPUT_CHARS", 2000000
+        )
+        if len(prompt) > max_prompt_chars:
+            result.sync = True
+            result.errors.append(
+                {
+                    "field": "files",
+                    "messages": [_("The record is too large for AI validation.")],
+                    "description": _("AI validation was skipped."),
+                    "severity": "warning",
+                }
+            )
+            return result
 
         from oarepo_checks.tasks import run_llm_check
 
@@ -74,6 +88,12 @@ class LLMCheck(Check):
 
     def parse_errors(self, llm_output: str) -> list[dict]:
         """Create error messages for the UI."""
+        max_output_chars = current_app.config.get(
+            "OAREPO_CHECKS_MAX_LLM_OUTPUT_CHARS", 5000000
+        )
+        if len(llm_output) > max_output_chars:
+            return []
+
         try:
             json_output = json.loads(llm_output)
         except json.JSONDecodeError:

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-08-26 12:57+0200\n"
+"POT-Creation-Date: 2026-08-26 13:33+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,23 +17,31 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: /Users/alzbetapokorna/cesnet/2026/refaktor14/oarepo-checks/oarepo_checks/checks/llm_check.py:28
+#: /Users/alzbetapokorna/cesnet/2026/refaktor14/oarepo-checks/oarepo_checks/checks/llm_check.py:29
 msgid "AI validation"
 msgstr ""
 
-#: /Users/alzbetapokorna/cesnet/2026/refaktor14/oarepo-checks/oarepo_checks/checks/llm_check.py:29
+#: /Users/alzbetapokorna/cesnet/2026/refaktor14/oarepo-checks/oarepo_checks/checks/llm_check.py:30
 msgid "Validates record using AI."
 msgstr ""
 
-#: /Users/alzbetapokorna/cesnet/2026/refaktor14/oarepo-checks/oarepo_checks/checks/llm_check.py:34
+#: /Users/alzbetapokorna/cesnet/2026/refaktor14/oarepo-checks/oarepo_checks/checks/llm_check.py:35
 msgid "Configuration must be a dictionary"
 msgstr ""
 
-#: /Users/alzbetapokorna/cesnet/2026/refaktor14/oarepo-checks/oarepo_checks/checks/llm_check.py:39
+#: /Users/alzbetapokorna/cesnet/2026/refaktor14/oarepo-checks/oarepo_checks/checks/llm_check.py:40
 msgid "Configuration must contain a 'prompt' string"
 msgstr ""
 
-#: /Users/alzbetapokorna/cesnet/2026/refaktor14/oarepo-checks/oarepo_checks/checks/llm_check.py:117
+#: /Users/alzbetapokorna/cesnet/2026/refaktor14/oarepo-checks/oarepo_checks/checks/llm_check.py:72
+msgid "The record is too large for AI validation."
+msgstr ""
+
+#: /Users/alzbetapokorna/cesnet/2026/refaktor14/oarepo-checks/oarepo_checks/checks/llm_check.py:73
+msgid "AI validation was skipped."
+msgstr ""
+
+#: /Users/alzbetapokorna/cesnet/2026/refaktor14/oarepo-checks/oarepo_checks/checks/llm_check.py:137
 msgid "LLM generated errors. Proceed with caution."
 msgstr ""
 

@@ -13,6 +13,7 @@ from invenio_checks.base import Check
 from invenio_checks.contrib.metadata.check import CheckResult
 from invenio_i18n import get_locale
 from oarepo_runtime.proxies import current_runtime
+from invenio_i18n import lazy_gettext as _
 
 if TYPE_CHECKING:
     from invenio_checks.models import CheckConfig
@@ -24,18 +25,18 @@ class LLMCheck(Check):
     """Check for validating record using LLM."""
 
     id = "llm"
-    title = "AI validation"
-    description = "Validates record using AI."
+    title =  _("AI validation")
+    description = _("Validates record using AI.")
 
     def validate_config(self, config: CheckConfig) -> bool:
         """Validate the configuration for this metadata check."""
         if not isinstance(config, dict):
-            raise TypeError("Configuration must be a dictionary")
+            raise TypeError(_("Configuration must be a dictionary"))
 
         # Check for prompt string
         prompt = config.get("prompt")
         if not prompt or not isinstance(prompt, str):
-            raise ValueError("Configuration must contain a 'prompt' string")
+            raise ValueError(_("Configuration must contain a 'prompt' string"))
 
         return True
 
@@ -113,7 +114,7 @@ class LLMCheck(Check):
                 {
                     "field": path,
                     "messages": valid_errors,
-                    "description": "LLM generated errors. Proceed with caution.",
+                    "description": _("LLM generated errors. Proceed with caution."),
                     "severity": "warning",
                 }
             )

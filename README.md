@@ -32,7 +32,7 @@ This library provides:
   - enabled (default: True) - Enables or disables LLM checks configuration.
   - client_name (default: "chat_einfra") - Name under which the client is registered.
   - api_url (default:  "https://llm.ai.e-infra.cz/v1/chat/completions") - Chat completion endpoint URL.
-  - model (default:  "mini") - Model used for completions.
+  - model (default:  "nrp") - Model used for completions.
   - fallback_community (default: None) - Community slug used when a record has no community.
   - as_default (default: True) - Sets the registered client as the default OARepo Checks LLM client.
 

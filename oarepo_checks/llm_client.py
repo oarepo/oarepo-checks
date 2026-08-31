@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-checks (see https://github.com/oarepo/oarepo-checks).
-#
-# oarepo-checks is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """LLM Client for making requests to Language Model APIs."""
 
 from __future__ import annotations
@@ -38,7 +33,7 @@ class ChatEInfraClient(BaseLLMClient):
         self,
         api_token: str,
         api_url: str = "https://llm.ai.e-infra.cz/v1/chat/completions",
-        model: str = "gpt-oss-120b",  # TODO: this changes frequently
+        model: str = "mini",
     ):
         """Initialize the ChatEInfra client.
 
@@ -91,7 +86,7 @@ class ChatEInfraClient(BaseLLMClient):
         # Merge any additional kwargs
         data.update(kwargs)
 
-        response = requests.post(self.api_url, headers=headers, json=data)  # noqa: S113
+        response = requests.post(self.api_url, headers=headers, json=data, timeout=60)
         response.raise_for_status()  # Raise exception for bad status codes
 
         response_json = response.json()

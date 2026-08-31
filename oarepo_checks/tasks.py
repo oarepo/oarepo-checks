@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-checks (see https://github.com/oarepo/oarepo-checks).
-#
-# oarepo-checks is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """Celery tasks for oarepo-checks."""
 
 from __future__ import annotations
@@ -58,6 +53,18 @@ def run_llm_check(
 
     if run is None:
         raise run_llm_check.retry(countdown=5)
+    llm_client = current_oarepo_checks.llm_client
+
+    if llm_client is None:
+        run.status = CheckRunStatus.COMPLETED
+        run.start_time = datetime.now(UTC)
+        run.end_time = datetime.now(UTC)
+        run.state = {"message": "LLM check skipped because no LLM client is configured."}
+        run.result = CheckResult(LLMCheck.id).to_dict()
+
+        db.session.add(run)
+        db.session.commit()
+        return
 
     run.status = CheckRunStatus.RUNNING
     run.start_time = datetime.now(UTC)
@@ -73,7 +80,7 @@ def run_llm_check(
     )
 
     try:
-        json_with_errors = current_oarepo_checks.llm_client.chat_completion(prompt)  # type: ignore[union-attr]
+        json_with_errors = llm_client.chat_completion(prompt)
 
         log.info("LLM response: %s", json_with_errors)
 

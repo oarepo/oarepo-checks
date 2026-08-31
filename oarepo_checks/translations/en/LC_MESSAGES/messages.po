@@ -1,6 +1,19 @@
 #
 msgid ""
 msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2024-03-27 11:31+0100\n"
+"PO-Revision-Date: 2026-08-26 13:06+0200\n"
+"Last-Translator: \n"
+"Language-Team: cs <LL@li.org>\n"
+"Language: cs\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2);\n"
+"Generated-By: Babel 2.14.0\n"
+"X-Generator: Poedit 3.5\n"
 
 #: /Users/m/Workspaces/repositories/feat-convert-old-catchall/oarepo-checks/oarepo_checks/templates/invenio_checks/requests/llm_tab.html:8
 msgid ""
@@ -70,4 +83,12 @@ msgstr ""
 #: /Users/m/Workspaces/repositories/feat-convert-old-catchall/oarepo-checks/oarepo_checks/templates/invenio_checks/requests/llm_tab.html:66
 msgid ""
 "Click on the \"Edit draft\" button to make changes and fix warnings/errors."
+msgstr ""
+
+#: /Users/alzbetapokorna/cesnet/2026/refaktor14/oarepo-checks/oarepo_checks/checks/llm_check.py:28
+msgid "AI validation"
+msgstr ""
+
+#: /Users/alzbetapokorna/cesnet/2026/refaktor14/oarepo-checks/oarepo_checks/checks/llm_check.py:29
+msgid "Validates record using AI."
 msgstr ""

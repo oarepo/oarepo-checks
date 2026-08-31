@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-checks (see https://github.com/oarepo/oarepo-checks).
-#
-# oarepo-checks is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """Component that creates/updates CheckConfig on community create/update."""
 
 from __future__ import annotations
@@ -62,21 +57,31 @@ class RegisterCheckComponent(ServiceComponent):
 
         logger.info("Creating check config for community %s", community)
 
+        if not community:
+            return
+
+        existing_config = CheckConfig.query.filter_by(
+            community_id=community.id,
+            check_id="llm",
+        ).first()
+        if existing_config:
+            logger.info("Check config for community %s already exists", community)
+            return
+
         # Generate the prompt with community-specific information
         prompt = self._create_prompt_for_community(community)
 
-        if community:
-            # Store the generated prompt
-            check_config_llm = CheckConfig(
-                community_id=community.id,  # Community ID where to add check to
-                check_id="llm",  # State that we would like to use the LLM check
-                severity=Severity.WARN,
-                enabled=True,
-                params={"prompt": prompt},
-            )
+        # Store the generated prompt
+        check_config_llm = CheckConfig(
+            community_id=community.id,  # Community ID where to add check to
+            check_id="llm",  # State that we would like to use the LLM check
+            severity=Severity.WARN,
+            enabled=True,
+            params={"prompt": prompt},
+        )
 
-            db.session.add(check_config_llm)
-            logger.info("Check config for community %s added to the database", community)
+        db.session.add(check_config_llm)
+        logger.info("Check config for community %s added to the database", community)
 
     def update(
         self,
@@ -102,7 +107,7 @@ class RegisterCheckComponent(ServiceComponent):
             # Create new config with generated prompt
             prompt = self._create_prompt_for_community(community)
             check_config_llm = CheckConfig(
-                community_id=community.id,  # type: ignore[union-attr]
+                community_id=community.id,  # ty: ignore[unresolved-attribute]
                 check_id="llm",
                 severity=Severity.WARN,
                 enabled=True,

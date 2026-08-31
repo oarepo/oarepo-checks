@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-checks (see https://github.com/oarepo/oarepo-checks).
-#
-# oarepo-checks is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """LLM check implementation."""
 
 from __future__ import annotations
@@ -13,11 +8,15 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING, cast
 
+from flask import current_app
 from invenio_access.permissions import system_identity
 from invenio_checks.base import Check
 from invenio_checks.contrib.metadata.check import CheckResult
 from invenio_i18n import get_locale
+from invenio_i18n import lazy_gettext as _
 from oarepo_runtime.proxies import current_runtime
+
+from oarepo_checks.proxies import current_oarepo_checks
 
 if TYPE_CHECKING:
     from invenio_checks.models import CheckConfig
@@ -29,8 +28,8 @@ class LLMCheck(Check):
     """Check for validating record using LLM."""
 
     id = "llm"
-    title = "AI validation"
-    description = "Validates record using AI."
+    title = _("AI validation")
+    description = _("Validates record using AI.")
 
     def validate_config(self, config: CheckConfig) -> bool:
         """Validate the configuration for this metadata check."""
@@ -48,6 +47,9 @@ class LLMCheck(Check):
         """Run the metadata check on a record with the given configuration."""
         # Create a check result
         result = CheckResult(self.id, sync=False)
+        if current_oarepo_checks.llm_client is None:
+            result.sync = True
+            return result
 
         # Serialize the record
         try:
@@ -64,7 +66,18 @@ class LLMCheck(Check):
         prompt = prompt.replace("{{record_serialized}}", json.dumps(serialized_full_record))
         prompt = prompt.replace("{{language}}", str(get_locale()))
 
-        # TODO: check for prompt length (depending on the LLM used) so we are not out of context window
+        max_prompt_chars = current_app.config.get("OAREPO_CHECKS_MAX_LLM_INPUT_CHARS", 2000000)
+        if len(prompt) > max_prompt_chars:
+            result.sync = True
+            result.errors.append(
+                {
+                    "field": "files",
+                    "messages": ["The record is too large for AI validation."],
+                    "description": "AI validation was skipped.",
+                    "severity": "warning",
+                }
+            )
+            return result
 
         from oarepo_checks.tasks import run_llm_check
 
@@ -78,18 +91,50 @@ class LLMCheck(Check):
 
     def parse_errors(self, llm_output: str) -> list[dict]:
         """Create error messages for the UI."""
-        json_output = json.loads(llm_output)
+        max_output_chars = current_app.config.get("OAREPO_CHECKS_MAX_LLM_OUTPUT_CHARS", 5000000)
+        if len(llm_output) > max_output_chars:
+            return []
+
+        try:
+            json_output = json.loads(llm_output)
+        except json.JSONDecodeError:
+            return []
+
+        if not isinstance(json_output, dict):
+            return []
 
         output = []
 
         for path, info in json_output.items():
-            if info.get("section_empty"):
+            if not isinstance(info, dict):
+                continue
+
+            errors = info.get("errors")
+
+            if not isinstance(errors, list) or not errors:
+                continue
+
+            valid_errors = []
+
+            for error in errors:
+                if not isinstance(error, dict):
+                    continue
+
+                valid_errors.append(
+                    {
+                        "error_short": str(error.get("error_short", "")),
+                        "error_long": str(error.get("error_long", "")),
+                        "manual_check_needed": bool(error.get("manual_check_needed", True)),
+                    }
+                )
+
+            if not valid_errors:
                 continue
 
             output.append(
                 {
                     "field": path,
-                    "messages": info["errors"],
+                    "messages": valid_errors,
                     "description": "LLM generated errors. Proceed with caution.",
                     "severity": "warning",
                 }

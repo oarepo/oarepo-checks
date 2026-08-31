@@ -1,11 +1,5 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-checks (see https://github.com/oarepo/oarepo-checks).
-#
-# oarepo-checks is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
 
 """OARepo checks flask extension."""
 
@@ -46,6 +40,8 @@ class OARepoChecks:
         from . import config
 
         app.config.setdefault("CHECKS_GENERIC_COMMUNITY", config.CHECKS_GENERIC_COMMUNITY)
+        app.config.setdefault("OAREPO_CHECKS_MAX_LLM_INPUT_CHARS", 2000000)
+        app.config.setdefault("OAREPO_CHECKS_MAX_LLM_OUTPUT_CHARS", 5000000)
         app.config.setdefault("COMMUNITIES_SERVICE_COMPONENTS", [*DefaultCommunityComponents]).extend(
             config.CHECKS_COMMUNITIES_SERVICE_COMPONENTS
         )
@@ -54,7 +50,7 @@ class OARepoChecks:
 
         from oarepo_checks.requests import LLMPublishDraftSubmitAction
 
-        PublishDraftRequestType.submit_action = LLMPublishDraftSubmitAction
+        PublishDraftRequestType.submit_action = LLMPublishDraftSubmitAction  # ty: ignore[invalid-assignment]
 
         from invenio_rdm_records.services.components import DefaultRecordsComponents
 
@@ -67,6 +63,19 @@ class OARepoChecks:
                 modified_records_components[i] = OARepoCheckComponent
 
         app.config["RDM_RECORDS_SERVICE_COMPONENTS"] = modified_records_components
+        self.init_ui_config()
+
+    def init_ui_config(self) -> None:
+        """Register checks UI component."""
+        from oarepo_rdm.ui.config import RDMRecordsUIResourceConfig
+
+        from oarepo_checks.ui import ChecksUIErrorsComponent
+
+        if ChecksUIErrorsComponent not in RDMRecordsUIResourceConfig.components:
+            RDMRecordsUIResourceConfig.components = (  # ty: ignore[invalid-assignment]
+                *RDMRecordsUIResourceConfig.components,
+                ChecksUIErrorsComponent,
+            )
 
     @property
     def llm_client(self) -> BaseLLMClient | None:

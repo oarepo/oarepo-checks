@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-checks (see https://github.com/oarepo/oarepo-checks).
-#
-# oarepo-checks is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """Checks proxies."""
 
 from __future__ import annotations
@@ -22,4 +17,4 @@ if TYPE_CHECKING:
 
 # note: mypy does not understand LocalProxy[OARepoChecks], so we type it as OARepoChecks
 # and ignore the redeclaration error
-current_oarepo_checks = LocalProxy(lambda: current_app.extensions["oarepo-checks"])  # type: ignore[assignment]
+current_oarepo_checks = LocalProxy(lambda: current_app.extensions["oarepo-checks"])  # ty: ignore[invalid-assignment]

@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-checks (see https://github.com/oarepo/oarepo-checks).
-#
-# oarepo-checks is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """Component that runs checks on record with no communities."""
 
 from __future__ import annotations
@@ -133,8 +128,8 @@ class OARepoCheckComponent(ChecksComponent):
         try:
             if record_or_draft is not None and isinstance(record_or_draft, (RDMRecord, RDMDraft)):
                 record_parent = cast("RDMParent", record_or_draft.parent)
-                if record_parent.review and record_parent.review.receiver:  # type: ignore[reportAttributeAccessIssue]
-                    community = record_parent.review.receiver.resolve()  # type: ignore[reportAttributeAccessIssue]
+                if record_parent.review and record_parent.review.receiver:  # ty: ignore[unresolved-attribute]
+                    community = record_parent.review.receiver.resolve()  # ty: ignore[unresolved-attribute]
                     communities.add(str(community.id))
                     if community.parent:
                         communities.add(str(community.parent.id))

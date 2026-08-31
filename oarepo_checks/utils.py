@@ -1,21 +1,38 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-checks (see https://github.com/oarepo/oarepo-checks).
-#
-# oarepo-checks is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """Utility functions for oarepo-checks."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 from flask import render_template
 
 if TYPE_CHECKING:
     from invenio_communities.communities.records.api import Community
+
+
+def check_error_messages(messages: list[Any]) -> list[str]:
+    """Convert check messages to the list[str] shape expected by deposit forms."""
+    normalized_messages = []
+    for message in messages or []:
+        if isinstance(message, str):
+            normalized_messages.append(message)
+            continue
+
+        if isinstance(message, dict):
+            text = (
+                message.get("message")
+                or message.get("error")
+                or message.get("error_long")
+                or message.get("error_short")
+            )
+            normalized_messages.append(str(text or message))
+            continue
+
+        normalized_messages.append(str(message))
+    return normalized_messages
 
 
 def create_prompt(
@@ -69,14 +86,11 @@ def create_prompt(
     )
 
     # Render final prompt that combines everything
-    return cast(
-        "str",
-        render_template(
-            prompt_template,
-            record_serialized=record_serialized,
-            repository_rules=repository_rules,
-            community_rules=community_rules,
-            community=community,
-            **extra_context,
-        ),
+    return render_template(
+        prompt_template,
+        record_serialized=record_serialized,
+        repository_rules=repository_rules,
+        community_rules=community_rules,
+        community=community,
+        **extra_context,
     )

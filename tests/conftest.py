@@ -1,11 +1,6 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-checks (see https://github.com/oarepo/oarepo-checks).
-#
-# oarepo-checks is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """Pytest configuration and fixtures for oarepo-checks tests."""
 
 from __future__ import annotations
@@ -115,9 +110,7 @@ def app_config(app_config):
     app_config["RECORDS_REFRESOLVER_CLS"] = "invenio_records.resolver.InvenioRefResolver"
     app_config["RECORDS_REFRESOLVER_STORE"] = "invenio_jsonschemas.proxies.current_refresolver_store"
 
-    records_index = LocalProxy(
-        lambda: current_rdm_records_service.record_cls.index._name  # noqa: SLF001
-    )
+    records_index = LocalProxy(lambda: current_rdm_records_service.record_cls.index._name)
     app_config["OAISERVER_RECORD_INDEX"] = records_index
     app_config["INDEXER_DEFAULT_INDEX"] = records_index
 
@@ -178,16 +171,6 @@ def app_config(app_config):
     app_config["CELERY_TASK_ALWAYS_EAGER"] = True
     app_config["SQLALCHEMY_DATABASE_URI"] = "postgresql+psycopg2://invenio:invenio@localhost:5432/invenio"
     return app_config
-
-
-@pytest.fixture(scope="module")
-def extra_entry_points():
-    """Extra entrypoints."""
-    return {
-        "invenio_base.blueprints": [
-            "invenio_app_rdm_records = tests.mock_module:create_invenio_app_rdm_records_blueprint",
-        ]
-    }
 
 
 @pytest.fixture

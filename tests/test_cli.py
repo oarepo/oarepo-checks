@@ -1,26 +1,23 @@
-#
-# Copyright (c) 2025 CESNET z.s.p.o.
-#
-# This file is a part of oarepo-checks (see https://github.com/oarepo/oarepo-checks).
-#
-# oarepo-checks is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
-#
+# SPDX-FileCopyrightText: 2025 CESNET z.s.p.o
+# SPDX-License-Identifier: MIT
+
 """Tests for CLI commands."""
 
 from __future__ import annotations
 
-import pytest
+from types import SimpleNamespace
+
 from click.testing import CliRunner
+from flask import Flask
 from invenio_checks.models import CheckConfig
 from invenio_communities import current_communities
 from invenio_communities.communities.records.api import Community
 from sqlalchemy.orm.attributes import flag_modified
 
+from oarepo_checks import cli as cli_module
 from oarepo_checks.cli import checks
 
 
-@pytest.mark.skip("Problems with DB fixture that keeps old data between tests")
 def test_enable_llm_check_success(app, db, users, location, search_clear):
     """Test enabling LLM check for a specific community."""
     community_owner = users[0]
@@ -77,7 +74,6 @@ def test_enable_llm_check_success(app, db, users, location, search_clear):
     assert updated_config.enabled is True
 
 
-@pytest.mark.skip("Problems with DB fixture that keeps old data between tests")
 def test_disable_llm_check_success(app, db, users, location, search_clear):
     """Test disabling LLM check for a specific community."""
     community_owner = users[0]
@@ -128,7 +124,6 @@ def test_disable_llm_check_success(app, db, users, location, search_clear):
     assert updated_config.enabled is False
 
 
-@pytest.mark.skip("Problems with DB fixture that keeps old data between tests")
 def test_disable_llm_check_nonexistent_community(app, db, search_clear):
     """Test disabling LLM check for a non-existent community."""
     runner = CliRunner()
@@ -139,7 +134,6 @@ def test_disable_llm_check_nonexistent_community(app, db, search_clear):
     assert "Error: Could not find community with slug 'nonexistent-community'" in result.output
 
 
-@pytest.mark.skip("Problems with DB fixture that keeps old data between tests")
 def test_disable_llm_check_already_disabled(app, db, users, location, search_clear):
     """Test disabling LLM check that is already disabled."""
     community_owner = users[0]
@@ -183,7 +177,6 @@ def test_disable_llm_check_already_disabled(app, db, users, location, search_cle
     assert "Disabled LLM check for community 'already-disabled'" in result.output
 
 
-@pytest.mark.skip("Problems with DB fixture that keeps old data between tests")
 def test_update_prompts_all_communities(app, db, users, location, search_clear):
     """Test updating prompts for all communities."""
     community_owner = users[0]
@@ -263,7 +256,6 @@ def test_update_prompts_all_communities(app, db, users, location, search_clear):
         assert community_obj.metadata["title"] in updated_config.params["prompt"]
 
 
-@pytest.mark.skip("Problems with DB fixture that keeps old data between tests")
 def test_update_prompts_specific_community(app, db, users, location, search_clear):
     """Test updating prompts for a specific community only."""
     community_owner = users[0]
@@ -350,3 +342,152 @@ def test_update_prompts_specific_community(app, db, users, location, search_clea
         check_id="llm",
     ).first()
     assert updated_config_2.params["prompt"] == "Old prompt 2"
+
+
+def test_cli_enable(monkeypatch):
+    app = Flask("test")
+    commits = []
+    added = []
+    config = SimpleNamespace(enabled=False)
+    community = {"id": "community-id", "metadata": {"title": "Community"}}
+
+    def commit():
+        commits.append(True)
+
+    monkeypatch.setattr(
+        cli_module,
+        "current_communities",
+        SimpleNamespace(
+            service=SimpleNamespace(search=lambda identity, params=None: SimpleNamespace(hits=[community]))
+        ),
+    )
+    monkeypatch.setattr(
+        cli_module,
+        "CheckConfig",
+        SimpleNamespace(query=SimpleNamespace(filter_by=lambda **kwargs: SimpleNamespace(all=lambda: [config]))),
+    )
+    monkeypatch.setattr(
+        cli_module,
+        "db",
+        SimpleNamespace(session=SimpleNamespace(add=added.append, commit=commit)),
+    )
+
+    with app.app_context():
+        result = CliRunner().invoke(checks, ["enable-llm-check", "community"])
+
+    assert result.exit_code == 0
+    assert "Enabled LLM check for community 'community' (1 config(s) updated)" in result.output
+    assert config.enabled is True
+
+    with app.app_context():
+        result = CliRunner().invoke(checks, ["disable-llm-check", "community"])
+
+    assert result.exit_code == 0
+    assert "Disabled LLM check for community 'community' (1 config(s) updated)" in result.output
+    assert config.enabled is False
+    assert added == [config, config]
+    assert len(commits) == 2
+
+
+def test_cli_no_community(monkeypatch):
+    app = Flask("test")
+
+    monkeypatch.setattr(
+        cli_module,
+        "current_communities",
+        SimpleNamespace(service=SimpleNamespace(search=lambda identity, params=None: SimpleNamespace(hits=[]))),
+    )
+
+    with app.app_context():
+        result = CliRunner().invoke(checks, ["disable-llm-check", "missing"])
+
+    assert result.exit_code == 0
+    assert "Error: Could not find community with slug 'missing'" in result.output
+
+    monkeypatch.setattr(
+        cli_module,
+        "current_communities",
+        SimpleNamespace(
+            service=SimpleNamespace(search=lambda identity, params=None: SimpleNamespace(hits=[{"id": "id"}]))
+        ),
+    )
+    monkeypatch.setattr(
+        cli_module,
+        "CheckConfig",
+        SimpleNamespace(query=SimpleNamespace(filter_by=lambda **kwargs: SimpleNamespace(all=list))),
+    )
+
+    with app.app_context():
+        result = CliRunner().invoke(checks, ["enable-llm-check", "without-check"])
+
+    assert result.exit_code == 0
+    assert "No LLM check found for community 'without-check'" in result.output
+
+
+def test_cli_update_prompts(monkeypatch):
+    app = Flask("test")
+    commits = []
+    added = []
+    flagged = []
+    community_one = {"id": "one", "metadata": {"title": "Community One"}}
+    community_two = {"id": "two", "metadata": {"title": "Community Two"}}
+    config_one = SimpleNamespace(params={"prompt": "old one"})
+    config_two = SimpleNamespace(params={"prompt": "old two"})
+
+    def commit():
+        commits.append(True)
+
+    monkeypatch.setattr(
+        cli_module,
+        "current_communities",
+        SimpleNamespace(
+            service=SimpleNamespace(
+                search=lambda identity, params=None: SimpleNamespace(
+                    hits=[community_one] if params else [community_one, community_two]
+                )
+            )
+        ),
+    )
+    monkeypatch.setattr(
+        cli_module,
+        "CheckConfig",
+        SimpleNamespace(
+            query=SimpleNamespace(
+                filter_by=lambda **kwargs: SimpleNamespace(
+                    all=lambda: [config_one] if kwargs["community_id"] == "one" else [config_two]
+                )
+            )
+        ),
+    )
+    monkeypatch.setattr(
+        cli_module,
+        "db",
+        SimpleNamespace(session=SimpleNamespace(add=added.append, commit=commit)),
+    )
+    monkeypatch.setattr(cli_module, "flag_modified", lambda value, field: flagged.append((value, field)))
+    monkeypatch.setattr(
+        cli_module,
+        "create_prompt",
+        lambda record_serialized, language, community: f"prompt for {community['metadata']['title']}",
+    )
+
+    with app.app_context():
+        result = CliRunner().invoke(checks, ["update-prompts"])
+
+    assert result.exit_code == 0
+    assert "Fetching all communities..." in result.output
+    assert "Community One: Updated 1 config(s)" in result.output
+    assert "Community Two: Updated 1 config(s)" in result.output
+    assert "Updated: 2" in result.output
+    assert config_one.params["prompt"] == "prompt for Community One"
+    assert config_two.params["prompt"] == "prompt for Community Two"
+
+    with app.app_context():
+        result = CliRunner().invoke(checks, ["update-prompts", "--community-slug", "community-one"])
+
+    assert result.exit_code == 0
+    assert "Community One: Updated 1 config(s)" in result.output
+    assert "Updated: 1" in result.output
+    assert added == [config_one, config_two, config_one]
+    assert flagged == [(config_one, "params"), (config_two, "params"), (config_one, "params")]
+    assert len(commits) == 2

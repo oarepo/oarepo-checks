@@ -91,3 +91,28 @@ def test_llm_check_failure(monkeypatch):
     assert run.state == {"error": "Async LLM check failed"}
     assert len(commits) == 2
     assert len(rollbacks) == 1
+
+
+def test_llm_check_skip(monkeypatch):
+    run = SimpleNamespace()
+    commits = []
+
+    session = SimpleNamespace(
+        add=lambda obj: None,
+        commit=lambda: commits.append(True),
+        rollback=lambda: None,
+    )
+
+    monkeypatch.setattr(tasks, "_find_check_run", lambda **kwargs: run)
+    monkeypatch.setattr(tasks, "db", SimpleNamespace(session=session))
+    monkeypatch.setattr(tasks, "current_oarepo_checks", SimpleNamespace(llm_client=None))
+
+    tasks.run_llm_check.run(
+        prompt="prompt",
+        record_id=str(uuid.uuid4()),
+        config_id=str(uuid.uuid4()),
+    )
+
+    assert run.status == tasks.CheckRunStatus.COMPLETED
+    assert run.result["errors"] == []
+    assert len(commits) == 1

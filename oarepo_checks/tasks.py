@@ -53,6 +53,18 @@ def run_llm_check(
 
     if run is None:
         raise run_llm_check.retry(countdown=5)
+    llm_client = current_oarepo_checks.llm_client
+
+    if llm_client is None:
+        run.status = CheckRunStatus.COMPLETED
+        run.start_time = datetime.now(UTC)
+        run.end_time = datetime.now(UTC)
+        run.state = {"message": "LLM check skipped because no LLM client is configured."}
+        run.result = CheckResult(LLMCheck.id).to_dict()
+
+        db.session.add(run)
+        db.session.commit()
+        return
 
     run.status = CheckRunStatus.RUNNING
     run.start_time = datetime.now(UTC)
@@ -68,7 +80,7 @@ def run_llm_check(
     )
 
     try:
-        json_with_errors = current_oarepo_checks.llm_client.chat_completion(prompt)  # ty: ignore[unresolved-attribute]
+        json_with_errors = llm_client.chat_completion(prompt)
 
         log.info("LLM response: %s", json_with_errors)
 

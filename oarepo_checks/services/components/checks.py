@@ -44,7 +44,7 @@ class OARepoCheckComponent(ChecksComponent):
     #
     # This is not a problem for now and it easily can be fixed (by overriding) in future if needed
 
-    def create(
+    def create(  # REVIEW: unnecessary? (ChecksComponent does nothing too)
         self,
         identity: Identity,
         data: dict[str, Any] | None = None,

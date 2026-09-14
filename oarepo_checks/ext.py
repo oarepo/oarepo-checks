@@ -42,7 +42,7 @@ class OARepoChecks:
         app.config.setdefault("CHECKS_GENERIC_COMMUNITY", config.CHECKS_GENERIC_COMMUNITY)
         app.config.setdefault("OAREPO_CHECKS_MAX_LLM_INPUT_CHARS", 2000000)
         app.config.setdefault("OAREPO_CHECKS_MAX_LLM_OUTPUT_CHARS", 5000000)
-        app.config.setdefault("COMMUNITIES_SERVICE_COMPONENTS", [*DefaultCommunityComponents]).extend(
+        app.config.setdefault("COMMUNITIES_SERVICE_COMPONENTS", [*DefaultCommunityComponents]).extend( # REVIEW: checks setting default community components doesn't pass the vibe check
             config.CHECKS_COMMUNITIES_SERVICE_COMPONENTS
         )
 

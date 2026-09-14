@@ -59,7 +59,7 @@ class LLMCheck(Check):
         except:  # noqa: E722
             # fallback to serializing the record manually (might not contain some fields)
             json_record = dict(record)
-            serialized_full_record = json.dumps(json_record)
+            serialized_full_record = json.dumps(json_record) # REVIEW: do not call json.dumps, it's called on :66 anyway
 
         # Get the pre-rendered prompt from config and replace the record placeholder
         prompt = config.params.get("prompt", "")
@@ -92,7 +92,7 @@ class LLMCheck(Check):
     def parse_errors(self, llm_output: str) -> list[dict]:
         """Create error messages for the UI."""
         max_output_chars = current_app.config.get("OAREPO_CHECKS_MAX_LLM_OUTPUT_CHARS", 5000000)
-        if len(llm_output) > max_output_chars:
+        if len(llm_output) > max_output_chars: # REVIEW: log the errors? - it makes sense for us to know if the llm produces gazillion characters or wrongly formatted output
             return []
 
         try:

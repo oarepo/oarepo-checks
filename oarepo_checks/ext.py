@@ -42,9 +42,19 @@ class OARepoChecks:
         app.config.setdefault("CHECKS_GENERIC_COMMUNITY", config.CHECKS_GENERIC_COMMUNITY)
         app.config.setdefault("OAREPO_CHECKS_MAX_LLM_INPUT_CHARS", 2000000)
         app.config.setdefault("OAREPO_CHECKS_MAX_LLM_OUTPUT_CHARS", 5000000)
-        app.config.setdefault("COMMUNITIES_SERVICE_COMPONENTS", [*DefaultCommunityComponents]).extend(
-            config.CHECKS_COMMUNITIES_SERVICE_COMPONENTS
+
+        community_components = list(
+            app.config.get(
+                "COMMUNITIES_SERVICE_COMPONENTS",
+                DefaultCommunityComponents,
+            )
         )
+
+        for component in config.CHECKS_COMMUNITIES_SERVICE_COMPONENTS:
+            if component not in community_components:
+                community_components.append(component)
+
+        app.config["COMMUNITIES_SERVICE_COMPONENTS"] = community_components
 
         from oarepo_requests.types.publish_draft import PublishDraftRequestType
 

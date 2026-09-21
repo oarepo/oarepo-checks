@@ -44,15 +44,6 @@ class OARepoCheckComponent(ChecksComponent):
     #
     # This is not a problem for now and it easily can be fixed (by overriding) in future if needed
 
-    def create(
-        self,
-        identity: Identity,
-        data: dict[str, Any] | None = None,
-        record: Record | None = None,
-        **kwargs: Any,
-    ) -> None:
-        """Skip checks when record is created."""
-
     def update_draft(
         self,
         identity: Identity,

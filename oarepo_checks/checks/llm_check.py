@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from typing import TYPE_CHECKING, cast
 
 from flask import current_app
@@ -22,6 +23,8 @@ if TYPE_CHECKING:
     from invenio_checks.models import CheckConfig
     from invenio_drafts_resources.services import RecordService
     from invenio_records.api import Record
+
+logger = logging.getLogger(__name__)
 
 
 class LLMCheck(Check):
@@ -56,10 +59,13 @@ class LLMCheck(Check):
             model = current_runtime.get_model_for_record(record)
             svc = cast("RecordService", model.service)
             serialized_full_record = svc.read_draft(system_identity, record["id"], expand=True).to_dict()
-        except:  # noqa: E722
+        except Exception:
             # fallback to serializing the record manually (might not contain some fields)
-            json_record = dict(record)
-            serialized_full_record = json.dumps(json_record)
+            logger.exception(
+                "Failed to serialize the full record; using raw record data.",
+                extra={"record_id": str(record.id)},
+            )
+            serialized_full_record = dict(record)
 
         # Get the pre-rendered prompt from config and replace the record placeholder
         prompt = config.params.get("prompt", "")
@@ -93,14 +99,23 @@ class LLMCheck(Check):
         """Create error messages for the UI."""
         max_output_chars = current_app.config.get("OAREPO_CHECKS_MAX_LLM_OUTPUT_CHARS", 5000000)
         if len(llm_output) > max_output_chars:
+            logger.warning(
+                "LLM output exceeds the maximum allowed length.",
+                extra={
+                    "output_length": len(llm_output),
+                    "max_output_length": max_output_chars,
+                },
+            )
             return []
 
         try:
             json_output = json.loads(llm_output)
         except json.JSONDecodeError:
+            logger.exception("LLM returned invalid JSON.")
             return []
 
         if not isinstance(json_output, dict):
+            logger.error("LLM returned invalid JSON.")
             return []
 
         output = []

@@ -156,7 +156,7 @@ def update_prompts(community_slug: str | None = None) -> None:
     else:
         # Get all communities
         click.echo("Fetching all communities...")
-        communities = list(current_communities.service.search(system_identity).hits)
+        communities = list(current_communities.service.scan(system_identity).hits)
         click.echo(f"Found {len(communities)} communities")
 
     click.echo()

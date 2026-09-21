@@ -444,7 +444,8 @@ def test_cli_update_prompts(monkeypatch):
             service=SimpleNamespace(
                 search=lambda identity, params=None: SimpleNamespace(
                     hits=[community_one] if params else [community_one, community_two]
-                )
+                ),
+                scan=lambda identity: SimpleNamespace(hits=[community_one, community_two]),
             )
         ),
     )

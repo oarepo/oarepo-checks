@@ -97,7 +97,7 @@ class RegisterCheckComponent(ServiceComponent):
 
         existing_configs = []
 
-        if community:
+        if community is not None:
             existing_configs = CheckConfig.query.filter_by(
                 community_id=community.id,
                 check_id="llm",
@@ -107,7 +107,7 @@ class RegisterCheckComponent(ServiceComponent):
             # Create new config with generated prompt
             prompt = self._create_prompt_for_community(community)
             check_config_llm = CheckConfig(
-                community_id=community.id,  # ty: ignore[unresolved-attribute]
+                community_id=community.id if community is not None else None,
                 check_id="llm",
                 severity=Severity.WARN,
                 enabled=True,

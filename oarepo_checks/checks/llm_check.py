@@ -31,8 +31,8 @@ class LLMCheck(Check):
     """Check for validating record using LLM."""
 
     id = "llm"
-    title = _("AI validation")
-    description = _("Validates record using AI.")
+    title = _("AI validation")  # ty: ignore[invalid-assignment]
+    description = _("Validates record using AI.")  # ty: ignore[invalid-assignment]
 
     def validate_config(self, config: CheckConfig) -> bool:
         """Validate the configuration for this metadata check."""
